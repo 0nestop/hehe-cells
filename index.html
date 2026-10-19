@@ -462,7 +462,7 @@ h4.mini{margin:14px 0 2px;font-size:13px}
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV=38,PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV=39,PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1022,6 +1022,7 @@ function expForm(E){const isNew=!E;E=E||{srcs:[]};const tp=S.settings.expTemplat
     const srcs=[0,1,2,3].map(i=>{const f=fd["f"+i],c=S.cultures[f];const l=fd["l"+i]||(c?c.lineId:"");return l||f?{lineId:l,flaskId:f||""}:null}).filter(Boolean);
     const seedAt=+new Date(fd.seedAt)||tomorrow10();
     const o=Object.assign({created:Date.now()},clone(E),{id:E.id||rid(),name:fd.name.trim(),status:fd.status||"auto",tags:(()=>{const tg=parseTags(fd.tags),cfg=tagCfg(),miss=tg.filter(t=>!cfg.some(x=>x.name===t));if(miss.length){S.settings.tags=mergedTags().concat(miss.filter(t=>!mergedTags().some(x=>x.name===t)).map(t=>({name:t,sh:tagSh(t)})));saveSettings(false)}return tg})(),notes:fd.notes,srcs,seedAt});openExp=o.id;expView="detail";ls.set("expView","detail");ls.set("openExp",o.id);save("exps",o);
+    if(!isNew&&E.seedAt!==seedAt)movePlan(o.id,seedAt);
     if(!isNew&&fd.shift)Object.values(S.cultures).filter(c=>c.expId===o.id&&c.status==="planned"&&c.seededAt!==seedAt).forEach(c=>{const c2=clone(c),d=seedAt-c2.seededAt;c2.seededAt=seedAt;(c2.treatments||[]).forEach(T=>{if(!T.rel&&T.at)T.at+=d});save("cultures",regen(c2))});
     if(isNew&&fd.tpl){const x=tp.find(y=>y.id===fd.tpl);if(x)fromExpTemplate(x,o,seedAt)}});
   const f=$("sheetForm").elements;[0,1,2,3].forEach(i=>f["l"+i].addEventListener("change",()=>{f["f"+i].innerHTML=flOpts(f["l"+i].value,"")}));
@@ -2236,8 +2237,11 @@ function screamClick(e){const fc=e.target.closest(".scface");if(fc){fc.classList
     setTimeout(()=>{box.innerHTML=`<p class="smashed">Smashed ✦ You don't have to carry that right now.</p>`},1700)},350)},450)}
 /* ---- game hub ---- */
 function regTags(tg){const cfg=tagCfg(),miss=tg.filter(t=>!cfg.some(x=>x.name===t));if(miss.length){const m=mergedTags();S.settings.tags=m.concat(miss.filter(t=>!m.some(x=>x.name===t)).map(t=>({name:t,sh:tagSh(t)})));saveSettings(false)}return tg}
-function shiftExp(E,at){if(!E||E.seedAt===at)return;const E2=clone(E);E2.seedAt=at;save("exps",E2);
+function shiftExp(E,at){if(!E||E.seedAt===at)return;const E2=clone(E);E2.seedAt=at;save("exps",E2);movePlan(E.id,at);
   Object.values(S.cultures).filter(c=>c.expId===E.id&&c.status==="planned"&&c.seededAt!==at).forEach(c=>{const c2=clone(c),d=at-c2.seededAt;c2.seededAt=at;(c2.treatments||[]).forEach(T=>{if(!T.rel&&T.at)T.at+=d});save("cultures",regen(c2))})}
+function movePlan(expId,at){Object.values(S.cultures).filter(c=>c.status==="active"&&c.plan&&(c.plan.exps||[]).includes(expId)&&c.plan.at!==at).forEach(c=>{const c2=clone(c),others=(c2.plan.exps||[]).filter(x=>x!==expId&&S.exps[x]);
+  if(others.length&&others.some(x=>S.exps[x].seedAt===c2.plan.at)){c2.plan.exps=others;save("cultures",c2);toast(`Taken off the ${sd(c.plan.at)} passage (other experiments still use it). Plan a new passage for it.`)}
+  else{c2.plan.at=at;save("cultures",c2);toast(`Passage moved to ${sd(at)}, ${st(at)} ✦`)}})}
 function planHost(expId){return Object.values(S.cultures).find(c=>c.status==="active"&&c.plan&&(c.plan.exps||[]).includes(expId))}
 function startPlan(C){if(!C)return;const pl=C.plan||{};const srcs=(pl.srcs&&pl.srcs.length?pl.srcs:[C.id]).filter(id=>S.cultures[id]&&S.cultures[id].status==="active");if(!srcs.length)return;
   plan.mode="adv";let g=plan.adv.find(x=>!x.done&&(x.srcs||[]).some(id=>srcs.includes(id)));
