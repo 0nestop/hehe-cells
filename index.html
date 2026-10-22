@@ -505,17 +505,21 @@ h2:nth-of-type(4n+2)::before{background:var(--yl)}h2:nth-of-type(4n+3)::before{b
 details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:nth-of-type(4n+2) h2::before{background:var(--yl)}details.setsec:nth-of-type(4n+3) h2::before{background:var(--tq)}details.setsec:nth-of-type(4n+4) h2::before{background:var(--lv)}
 .day.td{background:color-mix(in srgb,var(--pk) 14%,var(--bg))!important}.day.td .dh{color:color-mix(in srgb,#c2255c 75%,var(--fg))}
 .bknudge{border-color:var(--yl)!important;background:color-mix(in srgb,var(--yl) 12%,transparent)}
-.empty{border-color:var(--yl)!important;background:color-mix(in srgb,var(--yl) 10%,transparent)}
+.empty{border-color:var(--pk)!important;background:color-mix(in srgb,var(--pk) 6%,transparent)}
 .callout{border-color:var(--tq)!important;background:color-mix(in srgb,var(--tq) 12%,var(--bg))!important}
+.top{border-bottom:3px solid transparent!important;border-image:linear-gradient(90deg,var(--hi) 0 40%,var(--pk) 40% 60%,var(--yl) 60% 80%,var(--tq) 80%) 1!important}
+.ttl .c0{color:var(--hi)}.ttl .c1{color:var(--pk)}.ttl .c2{color:#e0a400}.ttl .c3{color:#1fa5a9}
+.crows.k-flask{border-color:var(--pk)!important}.sect.s-flask{color:color-mix(in srgb,#c2255c 70%,var(--fg))}
+.lineblk details.exp{border-color:#1fa5a9!important;border-left-width:4px}.lineblk details.exp[data-st="planning"]{border-color:#e0a400!important}.sect.s-exp{color:color-mix(in srgb,#1fa5a9 75%,var(--fg))}
 .callout .btn.solid{background:#1f9ea2;border-color:#1f9ea2;color:#fff}.callout .btn:not(.solid){border-color:#1f9ea2;color:color-mix(in srgb,#1f9ea2 80%,var(--fg));background:var(--bg)}.callout b{color:color-mix(in srgb,#1f9ea2 70%,var(--fg))}
-.brand h1{background:linear-gradient(90deg,var(--hi) 0%,var(--hi) 30%,var(--pk) 55%,#e6a800 75%,#22a9ad 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
 .madeby span{background:linear-gradient(90deg,var(--hi),var(--pk),#d9a400,#2bb3b7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
 #toast{background:linear-gradient(90deg,var(--hi),color-mix(in srgb,var(--hi) 70%,var(--pk)))}
 .tlscroll{overflow-y:hidden!important}.tln.ax,.tl2 .tr.ax{height:36px!important}
 </style>
 
 <div class="wrap">
-<div class="top"><div class="brand"><span id="hdrMascot"></span><div><h1>Hehe.. Cells</h1><span id="greet" class="sub"></span></div></div><div class="tr2"><span id="syncState">connecting…</span><button type="button" id="calmBtn" class="calm" aria-label="Stress relief" title="Feeling anxious? Tap me">♡</button></div></div>
+<div class="top"><div class="brand"><span id="hdrMascot"></span><div><h1 class="ttl" aria-label="Hehe.. Cells"><span class="c0">H</span><span class="c1">e</span><span class="c2">h</span><span class="c3">e</span><span class="c0">.</span><span class="c1">.</span> <span class="c3">C</span><span class="c0">e</span><span class="c1">l</span><span class="c2">l</span><span class="c3">s</span></h1><span id="greet" class="sub"></span></div></div><div class="tr2"><span id="syncState">connecting…</span><button type="button" id="calmBtn" class="calm" aria-label="Stress relief" title="Feeling anxious? Tap me">♡</button></div></div>
 <nav role="tablist">
   <button role="tab" data-tab="today" aria-selected="true">Today</button>
   <button role="tab" data-tab="seed" aria-selected="false">Seed</button>
@@ -533,7 +537,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.13",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.14",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1052,8 +1056,8 @@ function renderCultures(){
   const sortC=(a,b)=>(a.label||a.vessel).localeCompare(b.label||b.vessel,undefined,{numeric:true})||a.seededAt-b.seededAt;
   const sections=cs=>{let o="";const by={flask:[],dish:[],plate:[]};const ex={};
     cs.forEach(c=>{if(c.expId&&S.exps[c.expId]&&cview==="active"){(ex[c.expId]=ex[c.expId]||[]).push(c)}else by[kindOf(c.vessel)].push(c)});
-    [["flask","Flasks"],["dish","Dishes"],["plate","Plates"]].forEach(([k,t])=>{if(by[k].length)o+=`<div class="sect">${t}</div><div class="crows">${by[k].sort(sortC).map(c=>cRow(c)).join("")}</div>`});
-    const ek=Object.keys(ex);if(ek.length)o+=`<div class="sect">Experiments</div>`+ek.map(id=>expRow(S.exps[id],ex[id].sort(sortC))).join("");return o};
+    [["flask","Flasks"],["dish","Dishes"],["plate","Plates"]].forEach(([k,t])=>{if(by[k].length)o+=`<div class="sect s-${k}">${t}</div><div class="crows k-${k}">${by[k].sort(sortC).map(c=>cRow(c)).join("")}</div>`});
+    const ek=Object.keys(ex);if(ek.length)o+=`<div class="sect s-exp">Experiments</div>`+ek.map(id=>expRow(S.exps[id],ex[id].sort(sortC))).join("");return o};
   const projs=[...new Set(Ls.map(L=>L.project||""))],hasProj=projs.some(p=>p),Lg=[...projs.filter(p=>p),""].flatMap(p=>Ls.filter(L=>(L.project||"")===p));let lastP=null;
   Lg.forEach(L=>{if(hasProj&&(L.project||"")!==lastP){lastP=L.project||"";h+=`<div class="projh">${esc(lastP||"No project")}</div>`}const s=lineStats(L),cs=all.filter(c=>vis(c)&&(c.lineId===L.id||(c.layout&&plateLines(c).includes(L.id))));
     const uv=L.usualVessel||"T75",uc=num(L.usualCells);
