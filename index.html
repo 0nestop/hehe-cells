@@ -420,7 +420,7 @@ label.li.check{gap:8px;align-items:center;cursor:pointer}label.li.check .what{di
 .bknudge .btn{margin-left:auto}.bknudge .btn+.btn{margin-left:0}
 .madeby{display:flex;align-items:center;justify-content:center;gap:6px;margin:28px 0 8px;font-size:12px;color:var(--muted);letter-spacing:.02em}
 h4.mini{margin:14px 0 2px;font-size:13px}
-.tdrow{flex-wrap:wrap}.subt{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 12px;padding:2px 0 2px 28px;font-size:12.5px;color:var(--muted)}.subt label{display:inline-flex;flex-direction:row;margin:0;font-size:12.5px;align-items:center;gap:5px;cursor:pointer}.subt input{width:15px;height:15px;margin:0}
+.tdrow{flex-wrap:wrap}.subt{flex-basis:100%;display:flex;flex-direction:column;gap:0;margin:4px 0 0 28px;border-left:2px solid var(--line);font-size:14px;color:var(--fg)}.subt label{display:flex;flex-direction:row;margin:0;font-size:14px;padding:6px 0 6px 10px;border-bottom:1px dashed var(--line);align-items:center;gap:5px;cursor:pointer}.subt input{width:18px;height:18px;margin:0 4px 0 0}.subt label:last-child{border-bottom:0}
 .bxcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .bxsum,.bxsum b{font-family:var(--sans)!important}
 .bxsum{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--bg);border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;font:inherit;color:var(--fg);cursor:pointer}
@@ -439,6 +439,8 @@ h4.mini{margin:14px 0 2px;font-size:13px}
 .pchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;padding-right:150px}.pchip{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:0 5px;color:var(--fg)}.pchip .ic{width:13px;height:13px}.pchip small{color:var(--muted);font-size:10.5px}.pchip[data-end]{opacity:.45;text-decoration:line-through}
 .ecard .picons{position:absolute;top:9px;right:10px;display:flex;gap:4px;color:var(--line-strong);max-width:45%;flex-wrap:wrap;justify-content:flex-end}.ecard .pic.off{opacity:.3}
 .ecard .e1{padding-right:var(--picw,90px);align-items:center;gap:6px}.ecard .e1 b.enm{font-family:var(--sans);font-weight:500;font-size:14px}.ecard .elines{font-size:12.5px;color:var(--muted)}
+.sxlist{display:flex;flex-direction:column;gap:6px;margin:6px 0}.sxp{border:1px solid var(--line);border-radius:8px;padding:6px 9px}.sxp.sk{opacity:.6;border-style:dashed}.sxp .bh{gap:6px;flex-wrap:wrap}.sxd{font-size:12.5px}.sxd .unit{width:130px}
+details.pd.ended>summary{opacity:.55}details.pd.ended{border-style:dashed}.spill.endp{background:var(--line);color:var(--fg);margin-left:6px}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
 @media (prefers-reduced-motion:reduce){.scface.scr,.pane.crack{animation:none}}
 @media (prefers-reduced-motion:reduce){#hdrMascot.bounce{animation:none}}
@@ -467,7 +469,7 @@ h4.mini{margin:14px 0 2px;font-size:13px}
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV=41,PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV=42,PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -683,7 +685,8 @@ function countHTML(g){const cs=gCounts(g),ss=gSrcs(g),multi=cs.length>1;
   if(multi)h+=`<div class="tw"><table data-out="pool"></table></div>`;
   return h}
 function layoutPlates(it){if(it.t==="layout"){const P=S.cultures[it.plateId];return P&&P.layout?[P]:[]}
-  const all=Object.values(S.cultures).filter(c=>c.expId===it.expId&&c.layout&&c.status!=="ended");const pl=all.filter(c=>c.status==="planned");return pl.length?pl:all}
+  return expPlatesAll(it).filter(c=>!(it.skip||[]).includes(c.id))}
+function expPlatesAll(it){const all=Object.values(S.cultures).filter(c=>c.expId===it.expId&&c.layout&&c.status!=="ended");const pl=all.filter(c=>c.status==="planned");return(pl.length?pl:all).sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true}))}
 function itemInputs(it,ii){
   const head=t=>`<div class="bh"><span class="tag inv">${t}</span><button type="button" class="btn ghost sm" data-rm="${ii}">Remove</button></div>`;
   const up=plan.spin&&it.t!=="layout"&&it.t!=="exp"?IF("Top up to before spin (optional)","up",it.up,"mL","full"):"";
@@ -699,7 +702,10 @@ function itemInputs(it,ii){
     ${IF("Cells to freeze","cells",it.cells,"×10⁶","",false,1e6)}${IF("Cells per mL","conc",it.conc,"×10⁶/mL","",false,1e6)}${IF("Volume per cryovial","vial",it.vial,"mL")}${IF("DMSO","dmso",it.dmso,"%")}${up}</div></div>`;
   const ps=layoutPlates(it),E=it.t==="exp"?S.exps[it.expId]:null;
   return`<div class="inner" data-i="${ii}">${head(it.t==="exp"?"Experiment":"Planned plate")}<p class="pre">${it.t==="exp"?(E?esc(E.name):"Experiment deleted"):(ps[0]?esc(cName(ps[0])):"Plate deleted")} · ${ps.length} plate${ps.length===1?"":"s"}</p>
-    <div class="grid">${IF("Extra for pipetting","extra",it.extra,"%")}</div><p class="note">Wells of the same cell line and density are mixed once for all plates. Change them in the Plates tab.</p></div>`;
+    ${it.t==="exp"&&E?`<div class="sxlist">${expPlatesAll(it).map(P=>{const sk=(it.skip||[]).includes(P.id),li=lineItems(P).filter(x=>x.n);return`<div class="sxp${sk?" sk":""}"><div class="bh"><label class="check"><input type="checkbox" data-sskip="${P.id}"${sk?"":" checked"}> <b>${esc(P.label||"Plate")}</b> <span class="sub">${esc(P.vessel)} · ${wellsUsed(P)} wells</span></label><span class="row" style="gap:4px"><button type="button" class="btn ghost sm" data-sedit="${P.id}">Layout ›</button><button type="button" class="btn ghost sm" data-sdel="${P.id}">Delete</button></span></div>
+      ${sk?`<p class="note" style="margin:2px 0 0">Not seeding today. It stays planned.</p>`:li.length?`<div class="row" style="gap:8px">${li.map(x=>`<label class="sxd">${esc(x.name)}<div class="unit"><input type="number" inputmode="decimal" min="0" step="any" data-sdens="${P.id}|${x.key}" value="${+(x.cells/1e3).toFixed(2)}"><em>k/well</em></div></label>`).join("")}</div>`:`<p class="note" style="margin:2px 0 0">No cells on this plate yet. Open Layout to add them.</p>`}</div>`}).join("")}</div>
+    <div class="row"><button type="button" class="btn sm" data-sexp="${E.id}">Edit experiment</button></div>`:""}
+    <div class="grid">${IF("Extra for pipetting","extra",it.extra,"%")}</div><p class="note">Untick a plate to skip it today, or lower the density if you're short on cells. Wells of the same cell line and density are mixed once for all plates.</p></div>`;
 }
 function newItem(t,g){const L=S.lines[gLineId(g)];
   if(t==="plate"){const f=pick("plate","24-well");return{t,fmt:f,np:1,wells:VDEF[f].r*VDEF[f].c,cpw:defaultSeed(L,f),v:V(f).v,extra:0,up:"",name:""}}
@@ -813,8 +819,14 @@ $("tab-seed").addEventListener("change",e=>{const t=e.target;
   if(t.id==="pSpin"){plan.spin=t.checked;savePlan();renderSeed();return}
   const g=gOf(t);if(!g)return;
   if(t.dataset.addlayout!==undefined&&t.value){const[k,id]=t.value.split(":");g.items.push(k==="e"?{t:"exp",expId:id,extra:0}:{t:"layout",plateId:id,extra:0});savePlan();renderSeed()}
+  {const ib=t.closest("[data-i]"),it=ib&&g.items[+ib.dataset.i];
+   if(it&&t.dataset.sskip){it.skip=it.skip||[];if(t.checked)it.skip=it.skip.filter(x=>x!==t.dataset.sskip);else it.skip.push(t.dataset.sskip);savePlan();renderSeed();return}
+   if(t.dataset.sdens){const[pid,ln]=t.dataset.sdens.split("|"),P=S.cultures[pid];if(!P)return;const P2=clone(P),v=num(t.value)*1e3;P2.layout.dens[ln]=v>0?v:0;if(ln===P2.lineId)P2.seeded=P2.layout.dens[ln];save("cultures",P2);t.blur();renderSeed();toast("Density updated");return}}
   if(t.dataset.pool!==undefined&&t.value){g.srcs.push(t.value);gCounts(g).push(blankCount());savePlan();renderSeed()}});
 $("tab-seed").addEventListener("click",e=>{const t=e.target;
+  {const b=t.closest("[data-sexp]");if(b&&S.exps[b.dataset.sexp]){expForm(S.exps[b.dataset.sexp]);return}}
+  {const b=t.closest("[data-sedit]");if(b){const P=S.cultures[b.dataset.sedit];if(P){openExp=P.expId||"_none";ls.set("openExp",openExp);expView="detail";ls.set("expView","detail");openPlate=P.id;ls.set("openPlate",P.id);editing=true;renderPlates();showTab("plates")}return}}
+  {const b=t.closest("[data-sdel]");if(b){const P=S.cultures[b.dataset.sdel];if(P)openSheet(`Delete ${P.label||"this plate"}?`,`<p class="note">Removes the planned plate with its layout and actions from ${esc((S.exps[P.expId]||{}).name||"the experiment")}.</p>`,()=>{remove("cultures",P.id);renderSeed()},"Delete");return}}
   const sv=t.closest("[data-sv]");if(sv){sview="plan";ls.set("sview",sview);renderSeed();return}
   const sl=t.closest("[data-svload]");if(sl){const[k,id]=sl.dataset.svload.split(":");sview="";ls.set("sview","");if(k==="plan")startPlan(S.cultures[id]);else if(S.exps[id])expToSeed(S.exps[id]);return}
   const se=t.closest("[data-svedit]");if(se){const ex=se.dataset.exp;planForm(S.cultures[se.dataset.svedit],ex&&S.exps[ex]?{at:S.exps[ex].seedAt,exps:[ex],srcs:[se.dataset.svedit]}:null);return}
@@ -934,7 +946,7 @@ function cultureForm(C,lineId){const isNew=!C;
   f.seeded.addEventListener("input",upd);upd();
 }
 const MENU={flask:[["passage","Passage now"],["planP","Plan passage"],["photos","Photos"],["log","View log"],["endC","End"],["editC","Edit"]],
-  plate:[["openPlate","Plate map"],["photos","Photos"],["log","View log"],["endC","End"],["editC","Edit"]],
+  plate:[["openPlate","Plate map"],["harvNow","Mark harvested"],["photos","Photos"],["log","View log"],["endC","End"],["editC","Edit plate"]],
   planned:[["openPlate","Plate map"],["editC","Edit"],["delC","Delete"]],ended:[["reopen","Reopen"],["photos","Photos"],["log","View log"],["delC","Delete"]]};
 function chipsFor(C){const now=Date.now(),k=kindOf(C.vessel),st0=C.status,chips=[];
   if(st0==="active"){const day=Math.round((sod(now)-sod(C.seededAt))/DAY),pct=confNow(C),tgt=S.settings.targetConf||90,ta=confAt(C,tgt),nm=nextMedia(C),rem=nextRem(C);
@@ -1167,7 +1179,7 @@ function timelineCore(lanesIn){
   return`<div class="tlw"><div class="tlfix"><div class="tln ax"></div>${names}</div><div class="tlscroll" data-tlnow="${Math.round(px(now))}"><div class="tl2" style="width:${u}px"><div class="tr ax">${gaps}${ticks}</div>${rows}</div></div></div>
   <div class="legend"><span><span class="mk seed st"></span>Seed</span><span><span class="mk treat st"></span>Action</span><span><span class="mk harv st"></span>Harvest</span><span><span class="now st"></span>Now</span><span class="sub">⋯ = quiet days · scroll sideways</span></div>`}
 function plateBody(C,E){const ci=condItems(C),li=lineItems(C),mi=markItems(C),a=cArea(C),v=num(C.mediumMl)||V(C.vessel).v,Hv=(C.harvests||[])[0],items=pmode==="cond"?ci:pmode==="line"?li:mi;
-  const menu=MENU[C.status==="planned"||C.status==="tpl"?"planned":"plate"].filter(([k])=>k!=="openPlate"),ph=C.photos||[];
+  const menu=MENU[C.status==="planned"||C.status==="tpl"?"planned":C.status==="ended"?"ended":"plate"].filter(([k])=>k!=="openPlate"),ph=C.photos||[];
   const what=pmode==="cond"?"condition":pmode==="line"?"cell line":"label";
   return`<div class="bh"><p class="sub" style="margin:0">${esc(C.vessel)} · ${vol(v)} per well · ${wellsUsed(C)} wells</p>
     <div class="row">${C.status==="active"?`<button class="btn sm" data-act="media" data-id="${C.id}">Media ✓</button>`:""}<button type="button" class="btn sm${editing?" solid":""}" data-act="toggleEdit">${editing?"Done":"Edit layout"}</button>
@@ -1192,7 +1204,7 @@ function plateBody(C,E){const ci=condItems(C),li=lineItems(C),mi=markItems(C),a=
     <div class="row" style="border-top:1px solid var(--line);padding-top:12px">${C.status==="planned"?`<button class="btn solid" data-act="plateToSeed">Add to seeding plan</button><button class="btn" data-act="markSeeded">Mark as seeded</button>`:""}
       <button class="btn" data-act="dupPlate">Duplicate</button><button class="btn ghost" data-act="editPlate">Edit plate</button><button class="btn danger" data-act="delPlate">Delete</button></div>`}
 function plateDrop(C,E){const open=C.id===openPlate;
-  return`<details class="exp pd" data-pd="${C.id}"${open?" open":""}><summary>${ICON.plate}<div class="cm"><div class="l1">${E?`<b>${esc(E.name)}</b><span class="sep">|</span>`:""}${esc(C.label||C.vessel)}<span class="sep">|</span><span class="sub">${sdd(C.seededAt)}</span></div></div><span class="car">›</span><div class="l2">${chipsFor(C)}</div></summary>${open?`<div class="xin" style="padding:10px">${plateBody(C,E)}</div>`:""}</details>`}
+  const en=C.status==="ended";return`<details class="exp pd${en?" ended":""}" data-pd="${C.id}"${open?" open":""}><summary>${ICON.plate}<div class="cm"><div class="l1">${E?`<b>${esc(E.name)}</b><span class="sep">|</span>`:""}${esc(C.label||C.vessel)}<span class="sep">|</span><span class="sub">${sdd(C.seededAt)}</span></div></div><span class="car">›</span><div class="l2">${chipsFor(C)}</div></summary>${open?`<div class="xin" style="padding:10px">${plateBody(C,E)}</div>`:""}</details>`}
 function markItems(C){return(C.layout.marks||[]).map((m,i)=>({key:m.id,name:m.name,ab:String(i+1),n:(m.wells||[]).length,idx:i+1}))}
 function expCellsTxt(E,ps){const agg={};ps.forEach(P=>usedWells(P).forEach(w=>{const ln=lineOfWell(P,w),k=ln+"|"+densOf(P,ln);agg[k]=agg[k]||{ln,c:densOf(P,ln),n:0};agg[k].n++}));
   const src=Object.fromEntries((E.srcs||[]).map(s=>[s.lineId,S.cultures[s.flaskId]]));ps.forEach(P=>{const pa=(P.parents||[]).map(id=>S.cultures[id]).filter(Boolean);pa.forEach(F=>{if(!src[F.lineId])src[F.lineId]=F})});
@@ -1739,7 +1751,8 @@ function doAct(a,id,b){const C=S.cultures[id],L=S.lines[id];
       save("lines",L2)});
   if(a==="rmRec"){const L2=clone(L);L2.records.splice(+b.dataset.ix,1);save("lines",L2);return}
   if(!C)return;
-  if(a==="editC"){if(C.layout&&C.status==="planned")plateForm(C);else cultureForm(C)}
+  if(a==="editC"){if(C.layout)plateForm(C);else cultureForm(C)}
+  if(a==="harvNow"){const now=Date.now();openSheet(`Mark ${cName(C)} as harvested`,`${SF("Harvested on","at",isoDT(now),"datetime-local","","full")}<p class="note">The plate ends and stays in its experiment. Open harvest reminders are ticked off.</p>`,fd=>{const at=+new Date(fd.at)||now,C2=clone(C);C2.status="ended";C2.endedAt=at;C2.endNote="Harvested";(C2.reminders||[]).forEach(r=>{if(r.kind==="Harvest")r.done=true});addLog(C2,"Harvested");C2.log[C2.log.length-1].d=at;save("cultures",C2);toast("Marked as harvested ✦")},"Mark harvested");return}
   else if(a==="media"){const C2=clone(C);C2.lastMedia=Date.now();addLog(C2,"Media changed","media");save("cultures",C2);const n=nextMedia(C2);toast(`Media logged${n?" · next "+sd(n):""}`)}
   else if(a==="note")openSheet(`Note · ${cName(C)}`,`<label>Note<textarea name="t" placeholder="e.g. ~70% confluent, a bit clumpy"></textarea></label>`,fd=>{if(!fd.t.trim())return false;const C2=clone(C);addLog(C2,fd.t.trim());save("cultures",C2)});
   else if(a==="log")openSheet(`Log · ${cName(C)}`,(C.log||[]).length?`<div class="list">${C.log.slice().reverse().map(n=>`<div class="li"><span class="when">${sdd(n.d)}</span><span class="what">${esc(n.t)}</span></div>`).join("")}</div>`:`<p class="note">Nothing logged yet.</p>`,()=>true,"Close");
