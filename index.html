@@ -456,7 +456,18 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 .stone{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:2px;cursor:pointer;color:var(--fg);font:inherit;border-radius:10px}
 .stone svg{width:40px;height:46px}.stone small{font-size:10px;line-height:1.15;text-align:center;color:var(--muted);overflow-wrap:anywhere}.stone.on{background:var(--tint)}.stone.on svg path{stroke:var(--hi)}
 .gdet{border:1.5px solid var(--hi);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;margin-top:10px}.gdet i{font-size:13px;color:var(--muted)}
-.pw{clip-path:circle(50%);-webkit-clip-path:circle(50%)}
+.pw{border:0!important;background:none!important;overflow:visible!important;-webkit-appearance:none;appearance:none;border-radius:50%;padding:0!important}.pw::after{display:none}
+.pwc{position:absolute;inset:0;border-radius:50%;border:2px solid var(--line-strong);background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;transform:translateZ(0);-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.pwc::after{content:"";position:absolute;left:12%;right:12%;bottom:50%;border-top:1.5px dashed var(--muted);opacity:.7;pointer-events:none}
+.pw.ok .pwc{border-color:var(--ok);border-width:3px}.pw.over .pwc{border-color:var(--warn);border-width:3px}.pw.done:not(.ok):not(.over) .pwc{border-color:var(--hi)}
+.yard{position:relative;overflow:hidden;border-radius:12px;padding:8px 6px 10px;background:linear-gradient(#eef1f6,#f6f7fa)}
+.yard.rainy{background:linear-gradient(#c9cfd8,#dfe3e9)}.rain{position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(105deg,rgba(90,120,170,.35) 0 1.5px,transparent 1.5px 14px);background-size:60px 60px;animation:rainfall .5s linear infinite;opacity:.8}
+@keyframes rainfall{from{background-position:0 0}to{background-position:-16px 60px}}
+.ystones{align-items:end}.stone{justify-content:flex-end}.stone small{order:-1;min-height:2.3em;display:flex;align-items:flex-end;justify-content:center;color:#5c636b}.stone svg{width:44px;height:60px}.stone.on svg path:first-child{stroke:var(--hi);stroke-width:2}
+.ystones{gap:8px 0!important;padding:0!important}.stone{position:relative;padding:2px 0 7px!important;border-radius:10px 10px 0 0!important}.stone::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:#8cc97a}.stone svg{margin-bottom:-3px;position:relative;z-index:1}.yard.rainy .stone::after{background:#78b067}
+.bottle{pointer-events:auto!important;touch-action:none;cursor:grab}.bottle.held{cursor:grabbing;transition:none!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+.oitem{filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}.oslot{padding:2px!important;border-radius:7px}.oslot .osil{opacity:.22}
+@media (prefers-reduced-motion:reduce){.rain{animation:none}}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
 @media (prefers-reduced-motion:reduce){.scface.scr,.pane.crack{animation:none}}
 @media (prefers-reduced-motion:reduce){#hdrMascot.bounce{animation:none}}
@@ -508,7 +519,7 @@ nav{border-radius:var(--r);overflow:hidden}
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.10",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.11",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1940,13 +1951,21 @@ function calmGame(){gstop();const g=GAMES.find(x=>x[0]===gmode);
       c.innerHTML=blessFace(Math.random()<.55?"O":["T","U",">","^"][Math.floor(Math.random()*4)]);c.classList.remove("boop");void c.offsetWidth;c.classList.add("boop");
       const fx=f.querySelector(".calmfx"),b=document.createElement("span");b.className="spark";b.textContent=["♡","✦","○","★","✿"][n%5];b.style.left=(20+Math.random()*60)+"%";b.style.color=["var(--hi)","var(--c-harv)","var(--c-media)","var(--yel-d)","var(--c-conf)"][n%5];fx.appendChild(b);setTimeout(()=>b.remove(),1300);return}
     if(t.closest("[data-gkill]")){[...f.querySelectorAll("[data-bug]:not(.gone)")].forEach((b,i)=>setTimeout(()=>{if(!b.classList.contains("gone")){b.dataset.slow=1;b.click()}},i*200));return}
-    const bug=t.closest("[data-bug]");if(bug&&!bug.classList.contains("gone")){bump(SPRAYMSG[Math.floor(Math.random()*SPRAYMSG.length)]);
+    const bug=t.closest("[data-bug]");if(bug&&!bug.classList.contains("gone"))sprayKill(bug,true)};
+  f.onpointerdown=e=>{if(gmode==="grow")growPointer(e);else if(gmode==="pipette")pipDown(e);else if(gmode==="mice")miceDown(e);else if(gmode==="scream")screamDown(e);else if(gmode==="org")orgDown(e);else if(gmode==="spray")sprayDown(e)};
+  f.ontouchstart=gmode==="mice"?miceTouch:(gmode==="pipette"||gmode==="scream"||gmode==="spray")?(e=>{if(e.target.closest(".pw,[data-scream],[data-bottle]")&&e.cancelable)e.preventDefault()}):null;f.oncontextmenu=gmode==="mice"||gmode==="scream"||gmode==="pipette"?(e=>{if(e.target.closest(".mchip,.scbtn,.pw"))e.preventDefault()}):null}
+function sprayKill(bug,move){const f=$("sheetForm");const bump=msg=>{const n=gget("calm_"+gmode,0)+1;gset("calm_"+gmode,n);const cc=f.querySelector("[data-ccount]");if(cc)cc.textContent=`Contaminants cleared: ${n}`;if(!move&&Math.random()>.35)return n;floatText(f.querySelector(".calmfx"),n%25===0?`${n}! Your cells are glowing ✦`:msg);return n};bump(SPRAYMSG[Math.floor(Math.random()*SPRAYMSG.length)]);
       const ar=f.querySelector("[data-arena]"),bt=f.querySelector("[data-bottle]"),br=bug.getBoundingClientRect(),ar0=ar.getBoundingClientRect(),bx=br.left-ar0.left+br.width/2,by=br.top-ar0.top+br.height/2;
-      bt.style.left=Math.min(ar0.width-60,bx+18)+"px";bt.style.top=Math.max(0,Math.min(ar0.height-90,by-10))+"px";
+      if(move){bt.style.left=Math.min(ar0.width-60,bx+18)+"px";bt.style.top=Math.max(0,Math.min(ar0.height-90,by-10))+"px"}
       const m=document.createElement("span");m.className="mist";m.style.left=(bx-28)+"px";m.style.top=(by-28)+"px";ar.appendChild(m);setTimeout(()=>m.remove(),700);
-      const slow=bug.dataset.slow;delete bug.dataset.slow;bug.classList.add("gone");setTimeout(()=>{placeBug(bug,true);bug.classList.remove("gone")},slow?3200+Math.random()*1500:700)}};
-  f.onpointerdown=e=>{if(gmode==="grow")growPointer(e);else if(gmode==="pipette")pipDown(e);else if(gmode==="mice")miceDown(e);else if(gmode==="scream")screamDown(e);else if(gmode==="org")orgDown(e)};
-  f.ontouchstart=gmode==="mice"?miceTouch:(gmode==="pipette"||gmode==="scream")?(e=>{if(e.target.closest(".pw,[data-scream]")&&e.cancelable)e.preventDefault()}):null;f.oncontextmenu=gmode==="mice"||gmode==="scream"||gmode==="pipette"?(e=>{if(e.target.closest(".mchip,.scbtn,.pw"))e.preventDefault()}):null}
+      const slow=bug.dataset.slow;delete bug.dataset.slow;bug.classList.add("gone");setTimeout(()=>{placeBug(bug,true);bug.classList.remove("gone")},slow?3200+Math.random()*1500:700)}
+function sprayDown(e){const bt=e.target.closest("[data-bottle]");if(!bt)return;e.preventDefault();const f=$("sheetForm"),ar=f.querySelector("[data-arena]"),r0=ar.getBoundingClientRect();bt.classList.add("held");let px=e.clientX,py=e.clientY,last=0;
+  const nozzle=()=>({x:px-r0.left-2,y:py-r0.top-2});
+  const mv=ev=>{if(ev.cancelable)ev.preventDefault();const p=ev.touches?ev.touches[0]:ev;px=p.clientX;py=p.clientY;bt.style.left=Math.max(-10,Math.min(r0.width-40,px-r0.left-4))+"px";bt.style.top=Math.max(-10,Math.min(r0.height-60,py-r0.top-18))+"px"};
+  mv(e);const tick=now=>{if(!bt.classList.contains("held"))return;if(now-last>110){last=now;const n=nozzle();const m=document.createElement("span");m.className="mist";m.style.left=(n.x-30)+"px";m.style.top=(n.y-30)+"px";ar.appendChild(m);setTimeout(()=>m.remove(),700);
+      ar.querySelectorAll("[data-bug]:not(.gone)").forEach(b=>{const br=b.getBoundingClientRect(),bx=br.left-r0.left+br.width/2,by=br.top-r0.top+br.height/2;if(Math.hypot(bx-n.x+20,by-n.y)<44)sprayKill(b,false)})}GRAF=requestAnimationFrame(tick)};GRAF=requestAnimationFrame(tick);
+  const tm=ev=>mv(ev);document.addEventListener("pointermove",mv,{passive:false});document.addEventListener("touchmove",tm,{passive:false});
+  holdEnd(e,()=>{bt.classList.remove("held");cancelAnimationFrame(GRAF);document.removeEventListener("pointermove",mv);document.removeEventListener("touchmove",tm)})}
 function placeBug(b,fresh){if(fresh){const k=["bact","fung","myco"][Math.floor(Math.random()*3)],c={bact:["#9ad66b","#c7e86b"],fung:["#c6a2ff","#e0b7ff"],myco:["#f4b183","#ffcf8a"]}[k][Math.floor(Math.random()*2)];b.innerHTML=SPRITE[k](c)}
   b.style.left=(4+Math.random()*70)+"%";b.style.top=(4+Math.random()*62)+"%"}
 /* ---- Breed some mice: sexing, weaning, pairing, het crosses, reading gels ---- */
@@ -2109,44 +2128,53 @@ const OSV={
   rack50:()=>`<svg viewBox="0 0 96 52" width="100%" height="100%"><rect x="2" y="24" width="92" height="24" rx="3" fill="#74c0fc" stroke="#333" stroke-width="1.5"/>${[0,1,2,3].map(i=>`<rect x="${9+i*21}" y="4" width="14" height="40" rx="3" fill="#f8f9fa" stroke="#333" stroke-width="1.2"/><rect x="${8+i*21}" y="2" width="16" height="6" rx="1.5" fill="#1c7ed6" stroke="#333" stroke-width="1"/>`).join("")}</svg>`,
   epp:()=>`<svg viewBox="0 0 84 46" width="100%" height="100%"><rect x="2" y="8" width="80" height="34" rx="3" fill="#ffa8a8" stroke="#333" stroke-width="1.5"/>${[...Array(12)].map((_,i)=>{const x=10+(i%6)*12.5,y=14+Math.floor(i/6)*14;return i%4===1?`<circle cx="${x}" cy="${y}" r="3.5" fill="#333" opacity=".35"/>`:`<path d="M${x-3} ${y-6}h6v8l-3 4l-3-4z" fill="#fff" stroke="#333" stroke-width=".9"/>`}).join("")}</svg>`,
   ice:()=>`<svg viewBox="0 0 70 50" width="100%" height="100%"><rect x="2" y="4" width="66" height="44" rx="6" fill="#e7f5ff" stroke="#333" stroke-width="1.6"/><rect x="7" y="9" width="56" height="34" rx="4" fill="#d0ebff"/>${[[16,20],[30,28],[46,18],[52,34],[22,36]].map(([x,y])=>`<rect x="${x-4}" y="${y-4}" width="8" height="8" rx="2" fill="#fff" stroke="#74c0fc" transform="rotate(20 ${x} ${y})"/>`).join("")}</svg>`};
-/* ---- Organise your bench: 3 levels, fully tiled ---- */
-const OSV2={
-  aid:()=>`<svg viewBox="0 0 30 100"><path d="M8 6h14v40l-3 8H11l-3-8z" fill="#5c7cfa" stroke="#333" stroke-width="1.4"/><rect x="6" y="40" width="18" height="30" rx="5" fill="#364fc7" stroke="#333" stroke-width="1.4"/><circle cx="15" cy="20" r="3" fill="#fff"/><circle cx="15" cy="30" r="3" fill="#fff"/><path d="M13 70h4v26h-4z" fill="#ced4da" stroke="#333"/></svg>`,
-  etoh:()=>`<svg viewBox="0 0 40 90"><rect x="8" y="22" width="24" height="64" rx="5" fill="#e7f5ff" stroke="#333" stroke-width="1.5"/><path d="M14 8h10v14H14z" fill="#fff" stroke="#333"/><path d="M24 10h10l-2 4h-8z" fill="#fff" stroke="#333"/><rect x="11" y="44" width="18" height="22" fill="#fff" stroke="#555"/><text x="20" y="58" font-size="7" text-anchor="middle" fill="#c92a2a" font-family="sans-serif" font-weight="700">70%</text></svg>`,
-  rack15:()=>`<svg viewBox="0 0 96 70"><rect x="2" y="38" width="92" height="28" rx="3" fill="#b2f2bb" stroke="#333" stroke-width="1.5"/>${[0,1,2,3,4,5].map(i=>`<rect x="${8+i*14.5}" y="4" width="10" height="56" rx="3" fill="#f8f9fa" stroke="#333"/><rect x="${7+i*14.5}" y="2" width="12" height="6" rx="1.5" fill="#2f9e44" stroke="#333"/>`).join("")}</svg>`,
-  eppbox:()=>`<svg viewBox="0 0 110 50"><rect x="2" y="2" width="106" height="46" rx="4" fill="#ffd8a8" stroke="#333" stroke-width="1.5"/>${[...Array(16)].map((_,i)=>`<circle cx="${12+(i%8)*12.3}" cy="${16+Math.floor(i/8)*18}" r="4.5" fill="#fff" stroke="#555"/>`).join("")}</svg>`,
-  pcr:()=>`<svg viewBox="0 0 110 50"><rect x="2" y="10" width="106" height="30" rx="4" fill="#f3d9fa" stroke="#333" stroke-width="1.5"/>${[0,1,2].map(r=>`<rect x="8" y="${14+r*8}" width="94" height="6" rx="3" fill="#fff" stroke="#9c36b5" stroke-width=".8"/>`).join("")}</svg>`,
-  flask:(c,l)=>`<svg viewBox="0 0 110 50"><path d="M4 8h76l8 8h16v18H88l-8 8H4z" fill="#f8f9fa" stroke="#333" stroke-width="1.5"/><rect x="100" y="14" width="8" height="22" rx="2" fill="${c}" stroke="#333"/><rect x="10" y="26" width="64" height="12" fill="#ffc9de" opacity=".8"/><text x="40" y="22" font-size="9" text-anchor="middle" fill="#333" font-family="monospace">${l}</text></svg>`,
-  petri:(n)=>`<svg viewBox="0 0 110 50">${[...Array(n)].map((_,i)=>`<ellipse cx="${55}" cy="${40-i*7}" rx="48" ry="7" fill="#f1f3f5" stroke="#333" stroke-width="1.2"/>`).join("")}</svg>`,
-  plate:(r,c,col,l)=>`<svg viewBox="0 0 110 74"><rect x="2" y="2" width="106" height="70" rx="5" fill="#f8f9fa" stroke="#333" stroke-width="1.5"/>${[...Array(r*c)].map((_,i)=>{const cw=96/c,rh=60/r;return`<circle cx="${7+cw*(i%c)+cw/2}" cy="${7+rh*Math.floor(i/c)+rh/2}" r="${Math.min(cw,rh)*.38}" fill="${col}" stroke="#555" stroke-width=".6"/>`}).join("")}<text x="104" y="70" font-size="7" text-anchor="end" fill="#333" font-family="monospace">${l}</text></svg>`,
-  gloves:()=>`<svg viewBox="0 0 160 50"><rect x="2" y="6" width="156" height="40" rx="3" fill="#d0bfff" stroke="#333" stroke-width="1.5"/><ellipse cx="80" cy="22" rx="22" ry="6" fill="#fff" stroke="#555"/><path d="M70 22q10-16 20 0" fill="#e5dbff" stroke="#555"/><text x="80" y="40" font-size="8" text-anchor="middle" fill="#5f3dc4" font-family="sans-serif" font-weight="700">NITRILE · M</text></svg>`,
-  spack:()=>`<svg viewBox="0 0 330 40"><rect x="2" y="6" width="326" height="28" rx="4" fill="#fff3bf" stroke="#333" stroke-width="1.5"/>${[0,1,2,3].map(i=>`<rect x="${12}" y="${10+i*6}" width="300" height="4" rx="2" fill="#fff" stroke="#888" stroke-width=".6"/>`).join("")}<text x="300" y="30" font-size="8" text-anchor="end" fill="#333" font-family="monospace">10 mL × 50</text></svg>`,
-  pan:()=>`<svg viewBox="0 0 330 40"><rect x="2" y="6" width="326" height="30" rx="6" fill="#adb5bd" stroke="#333" stroke-width="1.5"/><rect x="8" y="10" width="314" height="20" rx="4" fill="#a5d8ff"/><path d="M20 20q20-6 40 0t40 0t40 0t40 0t40 0t40 0t40 0" stroke="#fff" fill="none" stroke-width="1.5"/></svg>`,
-  tube50:()=>`<svg viewBox="0 0 110 80"><rect x="2" y="44" width="106" height="32" rx="3" fill="#74c0fc" stroke="#333" stroke-width="1.5"/>${[0,1,2,3].map(i=>`<rect x="${10+i*25}" y="6" width="16" height="66" rx="4" fill="#f8f9fa" stroke="#333"/><rect x="${9+i*25}" y="3" width="18" height="8" rx="2" fill="#1c7ed6" stroke="#333"/>`).join("")}</svg>`};
+/* ---- Organise your bench: flat colour blocks, fully tiled ---- */
+const SV=(w,h,b)=>`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${b}</svg>`,RR=(x,y,w,h,r,c,o="")=>`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(0,w).toFixed(1)}" height="${Math.max(0,h).toFixed(1)}" rx="${r}" fill="${c}"${o}/>`,CI=(x,y,r,c,o="")=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}"${o}/>`;
+const OF={
+  pip:c=>(w,h)=>{const bw=Math.min(w*.62,22),x=(w-bw)/2;return SV(w,h,RR(w/2-bw*.18,0,bw*.36,h*.07,2,c)+RR(x,h*.06,bw,h*.5,bw/2.6,"#e9ecef")+RR(x+bw*.2,h*.14,bw*.6,h*.08,2,c)+`<path d="M${x+bw*.12} ${h*.55}H${x+bw*.88}L${w/2+bw*.1} ${h*.92}H${w/2-bw*.1}Z" fill="#ced4da"/>`+RR(w/2-1.2,h*.9,2.4,h*.1,1,"#adb5bd"))},
+  tips:c=>(w,h)=>{let d="";const cols=12,rows=Math.max(3,Math.round(cols*(h/w))),sx=(w-8)/cols,sy=(h-8)/rows;for(let i=0;i<rows;i++)for(let j=0;j<cols;j++)d+=CI(4+sx*(j+.5),4+sy*(i+.5),Math.min(sx,sy)*.28,"rgba(0,0,0,.28)");return SV(w,h,RR(0,0,w,h,5,c)+d)},
+  strip:c=>(w,h)=>{const th=Math.min(h*.5,12),y=(h-th)/2;let m="";for(let i=1;i<10;i++)m+=RR(w*.06+i*w*.08,y+th*.15,1,th*.35,0,"rgba(0,0,0,.18)");return SV(w,h,RR(0,y,w*.9,th,th/2,"#f1f3f5")+RR(w*.86,y+th*.15,w*.14,th*.7,th/3,c)+m)},
+  spack:c=>(w,h)=>{let s="";for(let i=0;i<4;i++)s+=RR(w*.04,h*(.18+i*.17),w*.92,h*.09,3,"rgba(255,255,255,.75)");return SV(w,h,RR(0,0,w,h,5,c)+s)},
+  etoh:()=>(w,h)=>{const bw=Math.min(w*.7,26),x=(w-bw)/2;return SV(w,h,RR(x,h*.3,bw,h*.7,6,"#d0ebff")+RR(x+bw*.3,h*.12,bw*.4,h*.2,2,"#fff")+RR(x+bw*.5,h*.1,bw*.55,h*.06,2,"#fff")+RR(x+bw*.15,h*.5,bw*.7,h*.22,2,"#fff")+RR(x+bw*.3,h*.58,bw*.4,h*.06,1,"#e03131"))},
+  tissue:()=>(w,h)=>SV(w,h,RR(0,h*.35,w,h*.65,6,"#96f2d7")+RR(w*.25,h*.42,w*.5,h*.1,4,"#63e6be")+`<path d="M${w*.3} ${h*.47}C${w*.2} ${h*.1} ${w*.45} ${h*.28} ${w*.5} ${h*.02}C${w*.58} ${h*.28} ${w*.82} ${h*.12} ${w*.7} ${h*.47}Z" fill="#fff"/>`),
+  aid:()=>(w,h)=>SV(w,h,RR(w*.05,h*.25,w*.6,h*.5,h*.25,"#5c7cfa")+RR(w*.55,h*.15,w*.18,h*.7,6,"#364fc7")+RR(w*.72,h*.4,w*.26,h*.2,3,"#ced4da")+CI(w*.2,h*.5,h*.1,"#fff")+CI(w*.34,h*.5,h*.1,"#fff")),
+  waste:()=>(w,h)=>SV(w,h,`<path d="M${w*.08} ${h*.22}H${w*.92}L${w*.84} ${h}H${w*.16}Z" fill="#ffe066"/>`+RR(0,h*.06,w,h*.2,5,"#f08c00")+CI(w/2,h*.62,Math.min(w,h)*.16,"#e8590c")),
+  bottle:c=>(w,h)=>SV(w,h,RR(0,h*.12,w*.78,h*.76,h*.25,"#ffdeeb")+RR(w*.76,h*.3,w*.1,h*.4,2,"#fcc2d7")+RR(w*.85,h*.24,w*.15,h*.52,3,c)+RR(w*.06,h*.45,w*.66,h*.38,h*.18,"#faa2c1")),
+  rack:(n,cap,base)=>(w,h)=>{let t="";const sw=w/n;for(let i=0;i<n;i++)t+=RR(i*sw+sw*.22,h*.04,sw*.56,h*.86,sw*.2,"#f8f9fa")+RR(i*sw+sw*.18,0,sw*.64,h*.12,3,cap);return SV(w,h,RR(0,h*.52,w,h*.48,5,base)+t)},
+  eppbox:()=>(w,h)=>{let d="";const cols=8,rows=Math.max(2,Math.round(cols*h/w)),sx=w/cols,sy=h/rows;for(let i=0;i<rows;i++)for(let j=0;j<cols;j++)d+=CI(sx*(j+.5),sy*(i+.5),Math.min(sx,sy)*.32,"#fff");return SV(w,h,RR(0,0,w,h,5,"#ffd8a8")+d)},
+  gloves:()=>(w,h)=>{let f="";for(let i=0;i<4;i++)f+=RR(w*(.3+i*.1),h*(.04+(i%2)*.06),w*.075,h*.4,w*.04,"#9775fa");return SV(w,h,f+RR(0,h*.32,w,h*.68,6,"#d0bfff")+RR(w*.28,h*.38,w*.44,h*.12,5,"#b197fc"))},
+  flask:(c,big)=>(w,h)=>SV(w,h,`<path d="M0 ${h*.1}H${w*.7}L${w*.8} ${h*.3}H${w*.88}V${h*.7}H${w*.8}L${w*.7} ${h*.9}H0Z" fill="#f1f3f5"/>`+RR(w*.88,h*.26,w*.12,h*.48,3,c)+RR(w*.02,h*.55,w*.66,h*.3,3,"#ffc9de")),
+  dish:n=>(w,h)=>{let d="";for(let i=0;i<n;i++)d+=`<ellipse cx="${w/2}" cy="${h-h*.12-i*h*.2}" rx="${w*.46}" ry="${h*.12}" fill="${i%2?"#e9ecef":"#f8f9fa"}"/>`;return SV(w,h,d)},
+  plate:(r,c,col)=>(w,h)=>{let d="";const sx=(w-6)/c,sy=(h-6)/r;for(let i=0;i<r;i++)for(let j=0;j<c;j++)d+=CI(3+sx*(j+.5),3+sy*(i+.5),Math.min(sx,sy)*.38,col);return SV(w,h,RR(0,0,w,h,5,"#f8f9fa")+d)},
+  pan:()=>(w,h)=>SV(w,h,RR(0,0,w,h,8,"#adb5bd")+RR(5,5,w-10,h-10,6,"#a5d8ff")+RR(12,h*.4,w-24,3,2,"rgba(255,255,255,.7)"))};
+// [id, type, label, col, row, w, h, renderer]
 const OLV={
- bsc:{nm:"Biosafety cabinet",items:[["p1000","p1000","P1000",1,1,1,3,()=>OSV.pip("#1971c2","1000")],["p200","p200","P200",2,1,1,3,()=>OSV.pip("#f08c00","200")],["p20","p20","P20",3,1,1,3,()=>OSV.pip("#e8590c","20")],["aid","aid","Pipette aid",4,1,1,3,OSV2.aid],
-   ["t1000","t1000","1000 µL tips",5,1,2,1,()=>OSV.tips("#4dabf7")],["t200","t200","200 µL tips",5,2,2,1,()=>OSV.tips("#ffd43b")],["t10","t10","10 µL tips",5,3,2,1,()=>OSV.tips("#f1f3f5")],
-   ["s10","s10","10 mL stripette",1,4,4,1,()=>OSV.strip("#e03131","10 mL")],["s5","s5","5 mL stripette",1,5,4,1,()=>OSV.strip("#2f9e44","5 mL")],["etoh","etoh","70% ethanol",5,4,1,2,OSV2.etoh],["kim","kim","Kimwipes",6,4,1,2,OSV.kim]]},
- cab:{nm:"Cabinet",items:[["t50","t50","50 mL tubes",1,1,2,2,OSV2.tube50],["t15","t15","15 mL tubes",3,1,2,2,OSV2.rack15],["epb","epb","Eppendorf box",5,1,2,1,OSV2.eppbox],["pcr","pcr","PCR strips",5,2,2,1,OSV2.pcr],
-   ["f75","f75","T75 flasks",1,3,2,1,()=>OSV2.flask("#1c7ed6","T75")],["f25","f25","T25 flasks",3,3,2,1,()=>OSV2.flask("#e03131","T25")],["dish","dish","Petri dishes",5,3,2,1,()=>OSV2.petri(4)],
-   ["plates","plates","Well plates",1,4,3,1,()=>OSV2.plate(2,3,"#fff","6-well")],["glove","glove","Gloves",4,4,3,1,OSV2.gloves],["spk","spk","Stripette pack",1,5,6,1,OSV2.spack]]},
- inc:{nm:"Incubator",items:[["f175","f175","T175",1,1,3,1,()=>OSV2.flask("#7048e8","T175")],["fa","f75","T75",4,1,2,1,()=>OSV2.flask("#1c7ed6","T75")],["f25","f25","T25",6,1,1,1,()=>OSV2.flask("#e03131","T25")],
-   ["fb","f75","T75",1,2,2,1,()=>OSV2.flask("#1c7ed6","T75")],["fc","f75","T75",3,2,2,1,()=>OSV2.flask("#1c7ed6","T75")],["d10","d10","10 cm dishes",5,2,2,1,()=>OSV2.petri(3)],
-   ["w6","w6","6-well",1,3,2,1,()=>OSV2.plate(2,3,"#ffc9de","6")],["w24","w24","24-well",3,3,2,1,()=>OSV2.plate(4,6,"#ffc9de","24")],["w96","w96","96-well",5,3,2,1,()=>OSV2.plate(8,12,"#ffc9de","96")],
-   ["w12","w12","12-well",1,4,2,1,()=>OSV2.plate(3,4,"#ffc9de","12")],["w48","w48","48-well",3,4,2,1,()=>OSV2.plate(6,8,"#ffc9de","48")],["d6","d6","6 cm dishes",5,4,2,1,()=>OSV2.petri(2)],["pan","pan","Water pan",1,5,6,1,OSV2.pan]]}};
+ bsc:{nm:"Biosafety cabinet",rows:6,items:[["p1000","p1000","P1000",1,1,1,3,OF.pip("#1971c2")],["p200","p200","P200",2,1,1,3,OF.pip("#f08c00")],["p20","p20","P20",3,1,1,3,OF.pip("#e8590c")],["p10","p10","P10",4,1,1,3,OF.pip("#adb5bd")],
+   ["t1000","t1000","1000 µL tips",5,1,2,1,OF.tips("#4dabf7")],["t200","t200","200 µL tips",5,2,2,1,OF.tips("#ffd43b")],["t10","t10","10 µL tips",5,3,2,1,OF.tips("#dee2e6")],
+   ["s10","s10","10 mL stripette",1,4,4,1,OF.strip("#e03131")],["s5","s5","5 mL stripette",1,5,4,1,OF.strip("#2f9e44")],["etoh","etoh","70% ethanol",5,4,1,2,OF.etoh()],["kim","kim","Tissues",6,4,1,2,OF.tissue()],
+   ["aid","aid","Pipette aid",1,6,2,1,OF.aid()],["waste","waste","Waste bin",3,6,2,1,OF.waste()],["media","media","Media bottle",5,6,2,1,OF.bottle("#e03131")]]},
+ cab:{nm:"Cabinet",rows:6,items:[["sp25","sp25","25 mL stripettes",1,1,4,1,OF.spack("#ffd8a8")],["sp10","sp10","10 mL stripettes",1,2,4,1,OF.spack("#ffc9c9")],["sp5","sp5","5 mL stripettes",1,3,4,1,OF.spack("#b2f2bb")],
+   ["t50","t50","50 mL tubes",1,4,2,2,OF.rack(3,"#1c7ed6","#74c0fc")],["t15","t15","15 mL tubes",3,4,2,2,OF.rack(5,"#2f9e44","#b2f2bb")],["epb","epb","Eppendorf box",1,6,2,1,OF.eppbox()],["glove","glove","Gloves",3,6,2,1,OF.gloves()],
+   ["ta","t1000","1000 µL tips",5,1,2,1,OF.tips("#4dabf7")],["tb","t1000","1000 µL tips",5,2,2,1,OF.tips("#4dabf7")],["tc","t200","200 µL tips",5,3,2,1,OF.tips("#ffd43b")],["td","t200","200 µL tips",5,4,2,1,OF.tips("#ffd43b")],["te","t10","10 µL tips",5,5,2,1,OF.tips("#dee2e6")],["tf","t10","10 µL tips",5,6,2,1,OF.tips("#dee2e6")]]},
+ inc:{nm:"Incubator",rows:5,items:[["f175","f175","T175",1,1,3,1,OF.flask("#7048e8")],["fa","f75","T75",4,1,2,1,OF.flask("#1c7ed6")],["f25","f25","T25",6,1,1,1,OF.flask("#e03131")],
+   ["fb","f75","T75",1,2,2,1,OF.flask("#1c7ed6")],["fc","f75","T75",3,2,2,1,OF.flask("#1c7ed6")],["d10","d10","10 cm dishes",5,2,2,1,OF.dish(3)],
+   ["w6","w6","6-well",1,3,2,1,OF.plate(2,3,"#ffc9de")],["w24","w24","24-well",3,3,2,1,OF.plate(4,6,"#ffc9de")],["w96","w96","96-well",5,3,2,1,OF.plate(8,12,"#ffc9de")],
+   ["w12","w12","12-well",1,4,2,1,OF.plate(3,4,"#ffc9de")],["w48","w48","48-well",3,4,2,1,OF.plate(6,8,"#ffc9de")],["d6","d6","6 cm dishes",5,4,2,1,OF.dish(2)],["pan","pan","Water pan",1,5,6,1,OF.pan()]]}};
 let ORG=null;
-function orgHTML(){const lv=gget("org_lv","bsc"),L=OLV[lv]||OLV.bsc,best=gget("org_best_"+lv,null);
-  return`<div class="row psize">${Object.entries(OLV).map(([k,v])=>`<button type="button" class="btn sm${k===lv?" solid":""}" data-olv="${k}">${v.nm}</button>`).join("")}</div>
+function orgPick(){const ks=Object.keys(OLV),cur=gget("org_lv",""),o=ks.filter(k=>k!==cur),k=o[Math.floor(Math.random()*o.length)];gset("org_lv",k);return k}
+function orgHTML(){const keep=gget("org_keep",0);gset("org_keep",0);const lv=keep&&OLV[gget("org_lv","")]?gget("org_lv",""):orgPick(),L=OLV[lv],best=gget("org_best_"+lv,null);
+  return`<div class="row" style="justify-content:space-between;align-items:center"><b>${L.nm}</b><button type="button" class="btn sm" data-oswitch>Switch level ↻</button></div>
   <p class="note">Everything has a spot. Drag each thing into its outline at the top. Identical things fit any matching spot.</p>
-  <div class="bench lv-${lv}" data-bench><div class="ozone"></div>${L.items.map(o=>`<div class="oslot" data-slot="${o[0]}" data-ty="${o[1]}"><div class="osil">${o[7]()}</div></div>`).join("")}${L.items.map(o=>`<div class="oitem" data-oi="${o[0]}" data-ty="${o[1]}" title="${esc(o[2])}">${o[7]()}</div>`).join("")}</div>
+  <div class="bench lv-${lv}" data-bench data-lv="${lv}"><div class="ozone"></div>${L.items.map(o=>`<div class="oslot" data-slot="${o[0]}" data-ty="${o[1]}"><div class="osil"></div></div>`).join("")}${L.items.map(o=>`<div class="oitem" data-oi="${o[0]}" data-ty="${o[1]}" title="${esc(o[2])}" aria-label="${esc(o[2])}"></div>`).join("")}</div>
   <div class="row" style="justify-content:space-between;align-items:center"><span class="sub" data-ost>0/${L.items.length} tidy${best?` · best ${best.t}s`:""}</span><button type="button" class="btn sm ghost" data-omess>Mess it up again</button></div>`}
-function orgStart(){const f=$("sheetForm"),bn=f.querySelector("[data-bench]");if(!bn)return;const lv=gget("org_lv","bsc"),L=OLV[lv]||OLV.bsc,W=bn.clientWidth,H=bn.clientHeight,pad=6,cw=(W-pad*2)/6,rh=Math.min(54,(H*.5-pad)/5);
+function orgStart(){const f=$("sheetForm"),bn=f.querySelector("[data-bench]");if(!bn)return;const lv=bn.dataset.lv,L=OLV[lv],W=bn.clientWidth,H=bn.clientHeight,pad=6,cw=(W-pad*2)/6,rh=Math.min(cw*.82,(H*.56-pad)/L.rows),g=2;
   const box={};L.items.forEach(o=>{box[o[0]]={x:pad+(o[3]-1)*cw,y:pad+(o[4]-1)*rh,w:o[5]*cw,h:o[6]*rh}});
-  const zone=bn.querySelector(".ozone");zone.style.top=(pad+5*rh+6)+"px";
-  bn.querySelectorAll("[data-slot]").forEach(el=>{const b=box[el.dataset.slot];Object.assign(el.style,{left:b.x+"px",top:b.y+"px",width:b.w+"px",height:b.h+"px"})});
-  const y0=pad+5*rh+12;ORG={done:new Set(),t0:Date.now(),moves:0,box,lv,n:L.items.length,taken:{}};
-  bn.querySelectorAll("[data-oi]").forEach(el=>{const b=box[el.dataset.oi],w=b.w-6,h=b.h-6;el.dataset.w=w;el.dataset.h=h;el.style.width=w+"px";el.style.height=h+"px";
-    el.style.left=Math.max(0,Math.random()*(W-w))+"px";el.style.top=Math.max(y0,Math.min(H-h-4,y0+Math.random()*(H-y0-h)))+"px";el.style.transform=`rotate(${Math.round((Math.random()-.5)*60)}deg)`;el.style.zIndex=1+Math.floor(Math.random()*20)})}
+  const zone=bn.querySelector(".ozone");zone.style.top=(pad+L.rows*rh+6)+"px";const byId=Object.fromEntries(L.items.map(o=>[o[0],o]));
+  bn.querySelectorAll("[data-slot]").forEach(el=>{const b=box[el.dataset.slot],o=byId[el.dataset.slot];Object.assign(el.style,{left:b.x+"px",top:b.y+"px",width:b.w+"px",height:b.h+"px"});el.firstChild.innerHTML=o[7](b.w-g*2-2,b.h-g*2-2)});
+  const y0=pad+L.rows*rh+12;ORG={done:new Set(),t0:Date.now(),moves:0,box,lv,n:L.items.length,taken:{}};
+  bn.querySelectorAll("[data-oi]").forEach(el=>{const b=box[el.dataset.oi],o=byId[el.dataset.oi],w=b.w-g*2,h=b.h-g*2;el.innerHTML=o[7](w,h);el.dataset.w=w;el.dataset.h=h;el.style.width=w+"px";el.style.height=h+"px";
+    el.style.left=Math.max(0,Math.random()*(W-w))+"px";el.style.top=Math.max(y0,Math.min(H-h-4,y0+Math.random()*(H-y0-h)))+"px";el.style.transform=`rotate(${Math.round((Math.random()-.5)*50)}deg)`;el.style.zIndex=1+Math.floor(Math.random()*20)})}
+function orgClick(e){if(e.target.closest("[data-oswitch]")){orgPick();gset("org_keep",1);calmGame();return}if(e.target.closest("[data-omess]")){gset("org_keep",1);calmGame()}}
 function orgDown(e){const el=e.target.closest&&e.target.closest("[data-oi]");if(!el||el.classList.contains("placed")||!ORG)return;e.preventDefault();const bn=el.parentNode,br=bn.getBoundingClientRect(),w=+el.dataset.w,h=+el.dataset.h;
   const ox=e.clientX-br.left-el.offsetLeft,oy=e.clientY-br.top-el.offsetTop;el.style.zIndex=99;el.classList.add("held");el.style.transform="rotate(0deg) scale(1.05)";
   const mv=ev=>{ev.preventDefault();el.style.left=Math.max(-10,Math.min(br.width-w+10,ev.clientX-br.left-ox))+"px";el.style.top=Math.max(-10,Math.min(br.height-h+10,ev.clientY-br.top-oy))+"px"};
@@ -2154,19 +2182,18 @@ function orgDown(e){const el=e.target.closest&&e.target.closest("[data-oi]");if(
     const cx=el.offsetLeft+w/2,cy=el.offsetTop+h/2;let hit=null,bd=1e9;
     bn.querySelectorAll(`[data-slot][data-ty="${el.dataset.ty}"]`).forEach(sl=>{if(ORG.taken[sl.dataset.slot])return;const b=ORG.box[sl.dataset.slot],d=Math.hypot(cx-(b.x+b.w/2),cy-(b.y+b.h/2));if(d<bd){bd=d;hit=sl}});
     const b=hit&&ORG.box[hit.dataset.slot];
-    if(b&&bd<Math.max(28,Math.min(b.w,b.h)*.55)){ORG.taken[hit.dataset.slot]=1;Object.assign(el.style,{left:b.x+3+"px",top:b.y+3+"px",transform:"none",zIndex:2});el.classList.add("placed");hit.classList.add("filled");ORG.done.add(el.dataset.oi);
+    if(b&&bd<Math.max(28,Math.min(b.w,b.h)*.55)){ORG.taken[hit.dataset.slot]=1;Object.assign(el.style,{left:b.x+2+"px",top:b.y+2+"px",transform:"none",zIndex:2});el.classList.add("placed");hit.classList.add("filled");ORG.done.add(el.dataset.oi);
       const st=$("sheetForm").querySelector("[data-ost]");if(ORG.done.size===ORG.n){const t=Math.round((Date.now()-ORG.t0)/1000),k="org_best_"+ORG.lv,best=gget(k,null);if(!best||t<best.t)gset(k,{t});st.textContent=`All tidy in ${t}s ✦ ${ORG.moves} moves${!best||t<best.t?" · new best!":""}`;bn.classList.add("clean");floatText(bn,"So satisfying ✦")}
       else st.textContent=`${ORG.done.size}/${ORG.n} tidy`}
     else el.style.transform=`rotate(${Math.round((Math.random()-.5)*16)}deg)`};
   document.addEventListener("pointermove",mv,{passive:false});document.addEventListener("pointerup",up);document.addEventListener("pointercancel",up)}
-function orgClick(e){const lv=e.target.closest("[data-olv]");if(lv){gset("org_lv",lv.dataset.olv);calmGame();return}if(e.target.closest("[data-omess]"))calmGame()}
 
 /* ---- Seed my plate: hold to dispense ---- */
 let PIP=null;
 function pipHTML(){const n=gget("pip_n",24)===12?12:24,T=n===12?1000:500,c=n===12?4:6;PIP={n,T,c,v:Array(n).fill(0),act:-1};const best=gget("pip_best_"+n,n===24?gget("pip_best",null):null);
   return`<div class="row psize"><button type="button" class="btn sm${n===24?" solid":""}" data-psize="24">24-well · 500 µL</button><button type="button" class="btn sm${n===12?" solid":""}" data-psize="12">12-well · 1 mL</button></div>
     <p class="note">Hold a well to dispense medium and let go at <b>${T} µL</b>. One go per well, no topping up. Fill all ${n}.</p>
-    <div class="pplate${n===12?" p12":""}" data-pplate>${PIP.v.map((_,i)=>`<button type="button" class="pw" data-pw="${i}" aria-label="Well ${String.fromCharCode(65+Math.floor(i/c))}${i%c+1}"><span class="pf"></span><b>0</b></button>`).join("")}</div>
+    <div class="pplate${n===12?" p12":""}" data-pplate>${PIP.v.map((_,i)=>`<button type="button" class="pw" data-pw="${i}" aria-label="Well ${String.fromCharCode(65+Math.floor(i/c))}${i%c+1}"><span class="pwc"><span class="pf"></span><b>0</b></span></button>`).join("")}</div>
     <div data-presult><p class="sub" style="text-align:center">${best?`Best so far: mean ${best.mean.toFixed(1)} µL, CV ${best.cv.toFixed(1)}%`:"Let's see how steady your hands are."}</p></div>
     <div class="row" style="justify-content:center"><button type="button" class="btn ghost sm" data-preset>Empty the plate</button></div>`}
 function pipPaint(i){const el=$("sheetForm").querySelector(`[data-pw="${i}"]`);if(!el)return;const v=PIP.v[i],T=PIP.T;el.querySelector("b").textContent=Math.round(v);
@@ -2275,22 +2302,35 @@ const fallen=()=>Object.values(S.cultures).filter(c=>c.status==="ended").sort((a
 let GSEL=null;
 function flowers(){const s=S.settings.mourn||{},loc=gget("mourn",null);if(loc&&Object.keys(loc).length){const m=Object.assign({},s);Object.entries(loc).forEach(([id,x])=>{const a=m[id];if(!a||(x.n||0)>(a.n||0))m[id]=x});S.settings.mourn=m;saveSettings(false);try{localStorage.removeItem("mourn")}catch(e){}return m}return s}
 function graveName(c){const L=S.lines[c.lineId];return`${L?L.name:"Unknown"} ${c.layout?(c.label||c.vessel):pTxt(c)}`}
+let GRAIN=false;
+function stoneSVG(c,n){const lv=Math.floor(n/9),rem=n%9,bq=Math.floor(rem/3),fl=rem%3,age=Math.floor((Date.now()-(c.endedAt||Date.now()))/DAY),moss=age>=60?3:age>=21?2:age>=7?1:0;
+  const tall=lv>=2,top=tall?10:16,body=lv>=2?"#d5d8dc":"#b9bdc3",edge=lv>=3?"#e8b923":lv>=2?"#aeb3b9":"none";
+  let s=`<path d="M7 58V${top+12}a15 15 0 0 1 30 0V58z" fill="${body}"${edge!=="none"?` stroke="${edge}" stroke-width="2"`:""}/>`;
+  s+=`<text x="22" y="${top+22}" text-anchor="middle" font-size="6.5" font-weight="600" fill="#6c727a">RIP</text>`;
+  if(lv>=1)s+=`<path d="M22 ${top-9}v10M17.5 ${top-5}h9" stroke="${lv>=3?"#e8b923":"#8d939a"}" stroke-width="2.4" stroke-linecap="round"/>`;
+  if(lv>=3)s+=`<text x="22" y="${top+34}" text-anchor="middle" font-size="8" fill="#e8b923">★${lv>3?lv-2:""}</text>`;
+  if(moss)s+=`<g fill="#74b816" opacity=".85"><ellipse cx="11" cy="56" rx="${3+moss*1.6}" ry="${1.8+moss*.7}"/>${moss>1?`<ellipse cx="34" cy="55" rx="${2+moss}" ry="${1.6+moss*.5}"/><circle cx="9" cy="${44-moss*3}" r="${1+moss*.5}"/>`:""}${moss>2?`<circle cx="33" cy="38" r="2"/><ellipse cx="20" cy="${top+3}" rx="5" ry="1.8"/>`:""}</g>`;
+  let x=4;const foot=[];for(let i=0;i<bq;i++)foot.push(`<g transform="translate(${x},44)"><path d="M3 14l2-8M5 14V5M7 14l-2-8" stroke="#2f9e44" stroke-width="1"/><circle cx="2.5" cy="5" r="2.2" fill="#f783ac"/><circle cx="5" cy="3.4" r="2.2" fill="#ffd43b"/><circle cx="7.5" cy="5" r="2.2" fill="#da77f2"/></g>`),x+=9;
+  for(let i=0;i<fl;i++)foot.push(`<g transform="translate(${x+(i?2:0)},52)"><path d="M2 6V2" stroke="#2f9e44" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="#f783ac"/></g>`),x+=5;
+  return`<svg viewBox="0 0 44 60" aria-hidden="true">${s}${foot.join("")}</svg>`}
 function mournHTML(){const dead=fallen(),fl=flowers(),td=sod(Date.now()),tot=Object.values(fl).reduce((a,x)=>a+(x.n||0),0);
   if(!dead.length)return`<div class="empty"><p class="note">No fallen cultures yet. Long may they divide ✦</p></div>`;
   const by={};dead.forEach(c=>{const d=new Date(c.endedAt||c.seededAt),k=d.toLocaleDateString(undefined,{month:"long",year:"numeric"});(by[k]=by[k]||[]).push(c)});
   const sel=GSEL&&dead.find(c=>c.id===GSEL);
-  const detail=c=>{const x=fl[c.id]||{n:0},vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY)),E=c.expId&&S.exps[c.expId];
+  const detail=c=>{const x=fl[c.id]||{n:0},n=x.n||0,vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY)),E=c.expId&&S.exps[c.expId],lv=Math.floor(n/9),rem=n%9;
+    const prog=`${lv?`Tomb upgraded ${lv}× · `:""}${Math.floor(rem/3)} bouquet${Math.floor(rem/3)===1?"":"s"} · ${rem%3} flower${rem%3===1?"":"s"}`;
     return`<div class="gdet"><div class="bh"><b>${esc(graveName(c))}</b><button type="button" class="btn ghost sm" data-mclose aria-label="Close">✕</button></div>
       <span class="sub">${esc(c.vessel)}${E?` · ${esc(E.name)}`:""} · ${sd(c.seededAt)} – ${c.endedAt?sd(c.endedAt):"?"} · lived ${days} day${days===1?"":"s"}</span>
-      ${c.endNote?`<span class="sub">${esc(c.endNote)}</span>`:""}<i>${esc(epitaph(c))}</i>
-      <div class="row" style="align-items:center"><button type="button" class="btn sm${vis?" ghost":" solid"}" data-mfl="${c.id}"${vis?" disabled":""}>${vis?"Visited today ✿":"Lay a flower ✿"}</button>${x.n?`<span class="flw">${"✿".repeat(Math.min(x.n,12))}${x.n>12?` +${x.n-12}`:""}</span>`:""}</div></div>`};
-  return`<p class="sub">${dead.length} fallen culture${dead.length>1?"s":""} · ${tot} flower${tot===1?"":"s"} laid</p><div class="row"><button type="button" class="btn sm solid" data-mflall>Lay a flower for everyone</button></div>
-  <div class="yard">${Object.entries(by).map(([m,cs])=>`<div class="yrow"><span class="ym">${esc(m)}</span><div class="ystones">${cs.map(c=>{const x=fl[c.id]||{n:0},vis=x.last===td;
-    return`<button type="button" class="stone${c.id===GSEL?" on":""}${vis?" vis":""}" data-mgrave="${c.id}" aria-label="${esc(graveName(c))}"><svg viewBox="0 0 40 46" aria-hidden="true"><path d="M5 44V18a15 15 0 0 1 30 0v26z" fill="var(--field)" stroke="var(--line-strong)" stroke-width="1.8"/><text x="20" y="25" text-anchor="middle" font-size="7" fill="var(--muted)">RIP</text>${x.n?`<text x="20" y="40" text-anchor="middle" font-size="9" fill="#e0679a">✿${x.n>1?x.n:""}</text>`:""}</svg><small>${esc(graveName(c))}</small></button>`}).join("")}</div><div class="grass"></div></div>`).join("")}</div>
-  ${sel?detail(sel):`<p class="note">Tap a grave to visit. One flower per culture per day.</p>`}`}
+      ${c.endNote?`<span class="sub">${esc(c.endNote)}</span>`:""}<i>${esc(epitaph(c))}</i><span class="sub">${prog}. 3 flowers make a bouquet, 3 bouquets upgrade the tomb.</span>
+      <div class="row"><button type="button" class="btn sm${vis?" ghost":" solid"}" data-mfl="${c.id}"${vis?" disabled":""}>${vis?"Visited today ✿":"Lay a flower ✿"}</button></div></div>`};
+  return`<p class="sub">${dead.length} fallen culture${dead.length>1?"s":""} · ${tot} flower${tot===1?"":"s"} laid</p><div class="row"><button type="button" class="btn sm solid" data-mflall>Lay a flower for everyone</button><button type="button" class="btn sm${GRAIN?" solid":""}" data-mrain>${GRAIN?"Stop the rain":"Make it rain ☔"}</button></div>
+  <div class="yard${GRAIN?" rainy":""}">${Object.entries(by).map(([m,cs])=>`<div class="yrow"><span class="ym">${esc(m)}</span><div class="ystones">${cs.map(c=>{const x=fl[c.id]||{n:0};
+    return`<button type="button" class="stone${c.id===GSEL?" on":""}" data-mgrave="${c.id}" aria-label="${esc(graveName(c))}"><small>${esc(graveName(c))}</small>${stoneSVG(c,x.n||0)}</button>`}).join("")}</div></div>`).join("")}${GRAIN?`<div class="rain" aria-hidden="true"></div>`:""}</div>
+  ${sel?detail(sel):`<p class="note">Tap a grave to visit. One flower per culture per day. Older graves grow moss.</p>`}`}
 function mournClick(e){const fl=flowers(),td=sod(Date.now());let b;const lay=id=>{const x=fl[id]||{n:0};if(x.last===td)return false;x.n=(x.n||0)+1;x.last=td;fl[id]=x;return true};const keep=()=>{S.settings.mourn=fl;saveSettings(false)};
   if((b=e.target.closest("[data-mgrave]"))){GSEL=GSEL===b.dataset.mgrave?null:b.dataset.mgrave;calmGame();setTimeout(()=>{const d=$("sheetForm").querySelector(".gdet");if(d)d.scrollIntoView({block:"nearest",behavior:"smooth"})},30);return}
   if(e.target.closest("[data-mclose]")){GSEL=null;calmGame();return}
+  if(e.target.closest("[data-mrain]")){GRAIN=!GRAIN;calmGame();return}
   if((b=e.target.closest("[data-mfl]"))){lay(b.dataset.mfl);keep();calmGame();toast("A flower for them ✿");return}
   if(e.target.closest("[data-mflall]")){const n=fallen().filter(c=>lay(c.id)).length;keep();calmGame();toast(n?`Laid ${n} flower${n>1?"s":""} ✿`:"You've visited everyone today ✿")}}
 /* ---- Throw those anxieties ---- */
@@ -2301,10 +2341,10 @@ function screamHTML(){return`<div class="scwrap"><div class="thought"><textarea 
 let RED=0,REDT=null;
 function redPaint(face){const p=Math.round(Math.min(1,RED)*100);face.style.setProperty("--mbody",p?`color-mix(in srgb,#ff3b3b ${p}%,${face.dataset.base})`:"");}
 function tapHehe(face){if(face.dataset.boom)return;if(!face.dataset.base)face.dataset.base=getComputedStyle(face).getPropertyValue("--mbody").trim()||"#e9e1fb";
-  RED=Math.min(1,RED+.055);redPaint(face);face.classList.remove("boop");void face.offsetWidth;face.classList.add("boop");
+  RED=Math.min(1,RED+1/30+.0005);redPaint(face);face.classList.remove("boop");void face.offsetWidth;face.classList.add("boop");
   const tx=$("sheetForm").querySelector("[data-sct]");if(tx)tx.textContent=RED<.3?"Tap tap tap…":RED<.6?"Keep going. Let it out.":RED<.9?"Hehe is getting very red…":"Almost…!";
   if(RED>.45&&RED<1)face.innerHTML=blessFace(RED>.75?"S":"T");
-  clearInterval(REDT);REDT=setInterval(()=>{if(!document.body.contains(face)||face.dataset.boom){clearInterval(REDT);return}RED=Math.max(0,RED-.04);redPaint(face);if(RED<=.45&&face.querySelector(".mth"))face.innerHTML=blessFace("Q");if(RED===0)clearInterval(REDT)},400);
+  clearInterval(REDT);REDT=setInterval(()=>{if(!document.body.contains(face)||face.dataset.boom){clearInterval(REDT);return}RED=Math.max(0,RED-.025);redPaint(face);if(RED<=.45&&face.querySelector(".mth"))face.innerHTML=blessFace("Q");if(RED===0)clearInterval(REDT)},400);
   if(RED>=1)boomHehe(face)}
 function boomHehe(face){clearInterval(REDT);face.dataset.boom=1;const r=face.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,red=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   face.style.visibility="hidden";if(!red)for(let i=0;i<28;i++){const d=document.createElement("div"),a=Math.random()*Math.PI*2,dist=70+Math.random()*130,s=8+Math.random()*16;d.className="boomp";d.style.cssText=`left:${cx-s/2}px;top:${cy-s/2}px;width:${s}px;height:${s}px;background:${i%4?"#ff3b3b":"#f5c518"}`;document.body.appendChild(d);
@@ -2320,8 +2360,8 @@ function screamDown(e){const b=e.target.closest("[data-scream]");if(!b)return;e.
     if(tot>br.width){let rem=tot-br.width,x0=br.right,i=0;while(rem>0&&i<40){let g=SEGS[i];if(!g){g=document.createElement("div");g.className="scseg scr";g.style.left=(i?0:br.right-1)+"px";g.style.top=(i?Math.round(innerHeight*(.08+Math.random()*.84)):br.top+1)+"px";g.style.height=(br.height-2)+"px";bar.classList.add("full");document.body.appendChild(g);SEGS.push(g)}
       const w=Math.min(rem,innerWidth-x0);g.style.width=Math.max(0,w)+"px";g.classList.toggle("tip",rem<=innerWidth-x0);rem-=Math.max(1,w);x0=0;i++}}
     tx.textContent="A".repeat(Math.min(34,2+Math.floor(s*6)))+(s>6?"!!!":"");const amp=Math.min(6,1+s)+"px",col=`color-mix(in srgb,#e03131 ${Math.round(Math.min(1,s/9)*100)}%,var(--hi))`;face.style.setProperty("--amp",amp);bar.style.setProperty("--amp",amp);bar.classList.add("scr");fill.style.background=col;SEGS.forEach(g=>{g.style.background=col;g.style.setProperty("--amp",amp)});GRAF=requestAnimationFrame(step)};GRAF=requestAnimationFrame(step);
-  holdEnd(e,()=>{cancelAnimationFrame(GRAF);const s=(performance.now()-t0)/1000;face.classList.remove("scr");face.innerHTML=blessFace("^");fill.style.width="0";fill.style.background="";bar.classList.remove("full","scr");SEGS.forEach(x=>{x.style.opacity=0;setTimeout(()=>x.remove(),600)});SEGS=[];
-    tx.textContent=s<1?"A tiny one. That's allowed too.":s<4?"Good scream. Shoulders down, jaw unclenched ✦":"That was a big one. Hope some of it came out ✦"});}
+  holdEnd(e,()=>{cancelAnimationFrame(GRAF);const s=(performance.now()-t0)/1000;face.classList.remove("scr");face.innerHTML=blessFace("^");if(s>6)setTimeout(()=>boomHehe(face),80);fill.style.width="0";fill.style.background="";bar.classList.remove("full","scr");SEGS.forEach(x=>{x.style.opacity=0;setTimeout(()=>x.remove(),600)});SEGS=[];
+    if(s<=6)tx.textContent=s<1?"A tiny one. That's allowed too.":s<4?"Good scream. Shoulders down, jaw unclenched ✦":"That was a big one. Hope some of it came out ✦"});}
 function screamClick(e){const fc=e.target.closest(".scface");if(fc){tapHehe(fc);return}if(!e.target.closest("[data-smash]"))return;const f=$("sheetForm"),ta=f.querySelector("[data-worry]"),bub=f.querySelector(".thought"),txt=ta.value.trim();if(!txt){toast("Type something to smash first.");return}
   ta.value="";ta.style.visibility="hidden";const pane=document.createElement("div");pane.className="pane inb";[...txt.slice(0,280)].forEach(ch=>{const s=document.createElement("span");s.textContent=ch;pane.appendChild(s)});bub.appendChild(pane);
   const red=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
