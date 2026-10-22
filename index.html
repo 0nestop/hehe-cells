@@ -444,6 +444,19 @@ details.pd.ended>summary{opacity:.55}details.pd.ended{border-style:dashed}.spill
 .subt .sr{display:flex;align-items:center;border-bottom:1px dashed var(--line)}.subt .sr:last-child{border-bottom:0}.subt .sr label{flex:1;border-bottom:0}.subt .sr small{color:var(--muted);font-size:12px}
 div.tgrp{border:0!important;border-radius:0!important;padding:8px 10px!important}.list>div.tgrp+*,.list>*+div.tgrp{border-top:1px solid var(--line-strong)}
 div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0;margin:2px 0 6px 2px;background:none}div.tgrp>.list>*{border-left:0;border-right:0}
+.thought{position:relative;display:flex;align-items:flex-end;gap:8px;width:100%;max-width:360px;background:var(--field);border:2px solid var(--line-strong);border-radius:26px;padding:10px 10px 10px 14px;margin-bottom:22px}
+.thought textarea{flex:1;border:0!important;background:transparent!important;resize:none;padding:2px!important;font:15px/1.4 var(--sans)!important;min-height:44px}
+.thought textarea:focus{outline:none}.thought .tb1,.thought .tb2{position:absolute;border:2px solid var(--line-strong);background:var(--field);border-radius:50%}
+.thought .tb1{width:16px;height:16px;left:44%;bottom:-20px}.thought .tb2{width:9px;height:9px;left:40%;bottom:-32px}
+.thought .pane.inb{position:absolute;left:14px;right:96px;top:10px;padding:2px;border:0;background:none;font-size:15px}
+.scface{touch-action:manipulation;-webkit-tap-highlight-color:transparent}.boomp{position:fixed;border-radius:50%;z-index:40;pointer-events:none}
+.yard{display:flex;flex-direction:column;gap:14px;margin-top:6px}.yrow{display:flex;flex-direction:column;gap:2px}.ym{font:600 12px var(--sans);color:var(--muted)}
+.ystones{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px 4px;align-items:end;padding:0 4px}
+.grass{height:8px;border-radius:6px;background:linear-gradient(90deg,#9ccf8a,#7fbf6e,#9ccf8a);opacity:.7;margin-top:-2px}
+.stone{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:2px;cursor:pointer;color:var(--fg);font:inherit;border-radius:10px}
+.stone svg{width:40px;height:46px}.stone small{font-size:10px;line-height:1.15;text-align:center;color:var(--muted);overflow-wrap:anywhere}.stone.on{background:var(--tint)}.stone.on svg path{stroke:var(--hi)}
+.gdet{border:1.5px solid var(--hi);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;margin-top:10px}.gdet i{font-size:13px;color:var(--muted)}
+.pw{clip-path:circle(50%);-webkit-clip-path:circle(50%)}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
 @media (prefers-reduced-motion:reduce){.scface.scr,.pane.crack{animation:none}}
 @media (prefers-reduced-motion:reduce){#hdrMascot.bounce{animation:none}}
@@ -495,7 +508,7 @@ nav{border-radius:var(--r);overflow:hidden}
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.9",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.10",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -2254,28 +2267,51 @@ function breatheClick(e){const t=e.target,f=$("sheetForm");const bc=t.closest("[
   go.textContent="Pause";const P=BPAT[gget("br_pat","box")].ph;let i=-1,left=0,done=0;
   const next=()=>{i=(i+1)%P.length;if(i===0&&left===0&&done>=0){}if(i===0&&tx.dataset.started){done++;nn.textContent=`${done} breath${done>1?"s":""} ✦`}tx.dataset.started=1;const[lab,sec,sc]=P[i];left=sec;tx.textContent=`${lab}… ${left}`;cell.style.transition=`transform ${sec}s ease-in-out`;cell.style.transform=`scale(${sc})`;if(i===0)cell.innerHTML=blessFace("U");else if(lab.startsWith("Breathe out"))cell.innerHTML=blessFace("^")};
   delete tx.dataset.started;next();GT=setInterval(()=>{if($("sheet").hidden)return gstop();left--;if(left<=0)next();else tx.textContent=`${P[i][0]}… ${left}`},1000)}
-/* ---- Mourn your cells ---- */
+/* ---- Mourn your cells: a graveyard ---- */
 const EPI=["Gave their all for science.","Died doing what they loved: dividing.","Never contaminated, never forgotten.","They grew, they spread, they were trypsinised.","Gone but not forgotten (it's in the lab book).","Their bands live on."];
 function epitaph(c){const n=c.endNote||"";if(/contam/i.test(n))return"Taken too soon by contamination.";if(/pool/i.test(n))return"Pooled with friends. Together forever.";if(/passag/i.test(n))return`Passaged with honour. Lives on as P${(num(c.passage)||0)+1}.`;
   if(/harvest/i.test(n))return"Harvested for the data. A true hero.";if(/fix|stain|pfa/i.test(n))return"Preserved forever in PFA.";let h=0;for(const ch of String(c.id))h=(h*31+ch.charCodeAt(0))>>>0;return EPI[h%EPI.length]}
-const fallen=()=>Object.values(S.cultures).filter(c=>c.status==="ended").sort((a,b)=>(b.endedAt||0)-(a.endedAt||0)).slice(0,40);
-function mournHTML(){const dead=fallen(),fl=gget("mourn",{}),td=sod(Date.now()),tot=Object.values(fl).reduce((a,x)=>a+(x.n||0),0);
+const fallen=()=>Object.values(S.cultures).filter(c=>c.status==="ended").sort((a,b)=>(b.endedAt||0)-(a.endedAt||0));
+let GSEL=null;
+function flowers(){const s=S.settings.mourn||{},loc=gget("mourn",null);if(loc&&Object.keys(loc).length){const m=Object.assign({},s);Object.entries(loc).forEach(([id,x])=>{const a=m[id];if(!a||(x.n||0)>(a.n||0))m[id]=x});S.settings.mourn=m;saveSettings(false);try{localStorage.removeItem("mourn")}catch(e){}return m}return s}
+function graveName(c){const L=S.lines[c.lineId];return`${L?L.name:"Unknown"} ${c.layout?(c.label||c.vessel):pTxt(c)}`}
+function mournHTML(){const dead=fallen(),fl=flowers(),td=sod(Date.now()),tot=Object.values(fl).reduce((a,x)=>a+(x.n||0),0);
   if(!dead.length)return`<div class="empty"><p class="note">No fallen cultures yet. Long may they divide ✦</p></div>`;
-  return`<p class="sub">${dead.length} fallen culture${dead.length>1?"s":""} · ${tot} flower${tot===1?"":"s"} laid so far</p><div class="row"><button type="button" class="btn sm solid" data-mflall>Lay a flower for everyone</button></div>
-  <div class="graves">${dead.map(c=>{const L=S.lines[c.lineId],x=fl[c.id]||{n:0},vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY));
-    return`<div class="grave"><svg viewBox="0 0 60 64" width="46" height="50" aria-hidden="true"><path d="M8 62V26a22 22 0 0 1 44 0v36z" fill="var(--field)" stroke="var(--line-strong)" stroke-width="2"/><text x="30" y="36" text-anchor="middle" font-size="10" fill="var(--muted)">RIP</text><path d="M2 62h56" stroke="var(--line-strong)" stroke-width="2"/></svg>
-      <div class="gv"><b>${esc(L?L.name:"Unknown")} ${esc(c.layout?c.label||c.vessel:pTxt(c))}</b><span class="sub">${esc(c.vessel)} · lived ${days} day${days===1?"":"s"}${c.endedAt?` · ${sdd(c.endedAt)}`:""}</span><i>${esc(epitaph(c))}</i>
-      ${x.n?`<span class="flw">${"✿".repeat(Math.min(x.n,14))}${x.n>14?` +${x.n-14}`:""}</span>`:""}</div>
-      <button type="button" class="btn sm${vis?" ghost":""}" data-mfl="${c.id}"${vis?" disabled":""}>${vis?"Visited ✿":"Lay a flower"}</button></div>`}).join("")}</div><p class="note">One flower per culture per day. They'd appreciate the visit.</p>`}
-function mournClick(e){const fl=gget("mourn",{}),td=sod(Date.now());let b;const lay=id=>{const x=fl[id]||{n:0};if(x.last===td)return false;x.n++;x.last=td;fl[id]=x;return true};
-  if((b=e.target.closest("[data-mfl]"))){lay(b.dataset.mfl);gset("mourn",fl);calmGame();toast("A flower for them ✿");return}
-  if(e.target.closest("[data-mflall]")){const n=fallen().filter(c=>lay(c.id)).length;gset("mourn",fl);calmGame();toast(n?`Laid ${n} flower${n>1?"s":""} ✿`:"You've visited everyone today ✿")}}
+  const by={};dead.forEach(c=>{const d=new Date(c.endedAt||c.seededAt),k=d.toLocaleDateString(undefined,{month:"long",year:"numeric"});(by[k]=by[k]||[]).push(c)});
+  const sel=GSEL&&dead.find(c=>c.id===GSEL);
+  const detail=c=>{const x=fl[c.id]||{n:0},vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY)),E=c.expId&&S.exps[c.expId];
+    return`<div class="gdet"><div class="bh"><b>${esc(graveName(c))}</b><button type="button" class="btn ghost sm" data-mclose aria-label="Close">✕</button></div>
+      <span class="sub">${esc(c.vessel)}${E?` · ${esc(E.name)}`:""} · ${sd(c.seededAt)} – ${c.endedAt?sd(c.endedAt):"?"} · lived ${days} day${days===1?"":"s"}</span>
+      ${c.endNote?`<span class="sub">${esc(c.endNote)}</span>`:""}<i>${esc(epitaph(c))}</i>
+      <div class="row" style="align-items:center"><button type="button" class="btn sm${vis?" ghost":" solid"}" data-mfl="${c.id}"${vis?" disabled":""}>${vis?"Visited today ✿":"Lay a flower ✿"}</button>${x.n?`<span class="flw">${"✿".repeat(Math.min(x.n,12))}${x.n>12?` +${x.n-12}`:""}</span>`:""}</div></div>`};
+  return`<p class="sub">${dead.length} fallen culture${dead.length>1?"s":""} · ${tot} flower${tot===1?"":"s"} laid</p><div class="row"><button type="button" class="btn sm solid" data-mflall>Lay a flower for everyone</button></div>
+  <div class="yard">${Object.entries(by).map(([m,cs])=>`<div class="yrow"><span class="ym">${esc(m)}</span><div class="ystones">${cs.map(c=>{const x=fl[c.id]||{n:0},vis=x.last===td;
+    return`<button type="button" class="stone${c.id===GSEL?" on":""}${vis?" vis":""}" data-mgrave="${c.id}" aria-label="${esc(graveName(c))}"><svg viewBox="0 0 40 46" aria-hidden="true"><path d="M5 44V18a15 15 0 0 1 30 0v26z" fill="var(--field)" stroke="var(--line-strong)" stroke-width="1.8"/><text x="20" y="25" text-anchor="middle" font-size="7" fill="var(--muted)">RIP</text>${x.n?`<text x="20" y="40" text-anchor="middle" font-size="9" fill="#e0679a">✿${x.n>1?x.n:""}</text>`:""}</svg><small>${esc(graveName(c))}</small></button>`}).join("")}</div><div class="grass"></div></div>`).join("")}</div>
+  ${sel?detail(sel):`<p class="note">Tap a grave to visit. One flower per culture per day.</p>`}`}
+function mournClick(e){const fl=flowers(),td=sod(Date.now());let b;const lay=id=>{const x=fl[id]||{n:0};if(x.last===td)return false;x.n=(x.n||0)+1;x.last=td;fl[id]=x;return true};const keep=()=>{S.settings.mourn=fl;saveSettings(false)};
+  if((b=e.target.closest("[data-mgrave]"))){GSEL=GSEL===b.dataset.mgrave?null:b.dataset.mgrave;calmGame();setTimeout(()=>{const d=$("sheetForm").querySelector(".gdet");if(d)d.scrollIntoView({block:"nearest",behavior:"smooth"})},30);return}
+  if(e.target.closest("[data-mclose]")){GSEL=null;calmGame();return}
+  if((b=e.target.closest("[data-mfl]"))){lay(b.dataset.mfl);keep();calmGame();toast("A flower for them ✿");return}
+  if(e.target.closest("[data-mflall]")){const n=fallen().filter(c=>lay(c.id)).length;keep();calmGame();toast(n?`Laid ${n} flower${n>1?"s":""} ✿`:"You've visited everyone today ✿")}}
 /* ---- Throw those anxieties ---- */
-function screamHTML(){return`<div class="scwrap"><div class="scface" data-scf role="button" aria-label="Boop Hehe">${blessFace("Q")}</div><div class="scbar"><div class="scfill" data-scfill></div></div>
-  <button type="button" class="btn solid scbtn" data-scream>Hold to scream</button><p class="sub" data-sct style="text-align:center">Hold the button and scream in your head. As loud as you like.</p></div>
-  <h2>Smash your worries</h2><textarea data-worry rows="3" placeholder="Type whatever is weighing on you. It's never saved."></textarea>
-  <div class="row"><button type="button" class="btn" data-smash>Smash it</button></div><div class="smashbox" data-smashbox></div>
+function screamHTML(){return`<div class="scwrap"><div class="thought"><textarea data-worry rows="2" placeholder="What's Hehe worrying about? Type it here…"></textarea><button type="button" class="btn sm solid" data-smash>Smash it</button><i class="tb1"></i><i class="tb2"></i></div>
+  <div class="scface" data-scf role="button" aria-label="Tap Hehe">${blessFace("Q")}</div><div class="scbar"><div class="scfill" data-scfill></div></div>
+  <button type="button" class="btn solid scbtn" data-scream>Hold to scream</button><p class="sub" data-sct style="text-align:center">Hold the button and scream in your head. Or tap Hehe as much as you need.</p></div>
   <p class="note">Nothing you type here is saved or sent anywhere. If something has been heavy for a while, telling someone you trust can help too.</p>`}
+let RED=0,REDT=null;
+function redPaint(face){const p=Math.round(Math.min(1,RED)*100);face.style.setProperty("--mbody",p?`color-mix(in srgb,#ff3b3b ${p}%,${face.dataset.base})`:"");}
+function tapHehe(face){if(face.dataset.boom)return;if(!face.dataset.base)face.dataset.base=getComputedStyle(face).getPropertyValue("--mbody").trim()||"#e9e1fb";
+  RED=Math.min(1,RED+.055);redPaint(face);face.classList.remove("boop");void face.offsetWidth;face.classList.add("boop");
+  const tx=$("sheetForm").querySelector("[data-sct]");if(tx)tx.textContent=RED<.3?"Tap tap tap…":RED<.6?"Keep going. Let it out.":RED<.9?"Hehe is getting very red…":"Almost…!";
+  if(RED>.45&&RED<1)face.innerHTML=blessFace(RED>.75?"S":"T");
+  clearInterval(REDT);REDT=setInterval(()=>{if(!document.body.contains(face)||face.dataset.boom){clearInterval(REDT);return}RED=Math.max(0,RED-.04);redPaint(face);if(RED<=.45&&face.querySelector(".mth"))face.innerHTML=blessFace("Q");if(RED===0)clearInterval(REDT)},400);
+  if(RED>=1)boomHehe(face)}
+function boomHehe(face){clearInterval(REDT);face.dataset.boom=1;const r=face.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,red=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  face.style.visibility="hidden";if(!red)for(let i=0;i<28;i++){const d=document.createElement("div"),a=Math.random()*Math.PI*2,dist=70+Math.random()*130,s=8+Math.random()*16;d.className="boomp";d.style.cssText=`left:${cx-s/2}px;top:${cy-s/2}px;width:${s}px;height:${s}px;background:${i%4?"#ff3b3b":"#f5c518"}`;document.body.appendChild(d);
+    d.animate([{transform:"translate(0,0) scale(1)",opacity:1},{transform:`translate(${Math.cos(a)*dist}px,${Math.sin(a)*dist}px) scale(.3)`,opacity:0}],{duration:700+Math.random()*400,easing:"cubic-bezier(.1,.7,.3,1)",fill:"forwards"});setTimeout(()=>d.remove(),1200)}
+  if(navigator.vibrate)try{navigator.vibrate(60)}catch(x){}
+  setTimeout(()=>{RED=0;face.style.removeProperty("--mbody");face.innerHTML=blessFace("^");face.style.visibility="";delete face.dataset.boom;face.animate&&face.animate([{transform:"scale(.2)",opacity:0},{transform:"scale(1.12)",opacity:1},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});
+    const tx=$("sheetForm").querySelector("[data-sct]");if(tx)tx.textContent="Pop! A fresh, happy Hehe ✦"},650)}
 let SEGS=[];
 function screamDown(e){const b=e.target.closest("[data-scream]");if(!b)return;e.preventDefault();const f=$("sheetForm"),face=f.querySelector("[data-scf]"),fill=f.querySelector("[data-scfill]"),tx=f.querySelector("[data-sct]"),t0=performance.now();face.classList.add("scr");face.innerHTML=blessFace("S");
   const bar=f.querySelector(".scbar"),br=bar.getBoundingClientRect(),sp=br.width/6;SEGS=[];
@@ -2286,12 +2322,12 @@ function screamDown(e){const b=e.target.closest("[data-scream]");if(!b)return;e.
     tx.textContent="A".repeat(Math.min(34,2+Math.floor(s*6)))+(s>6?"!!!":"");const amp=Math.min(6,1+s)+"px",col=`color-mix(in srgb,#e03131 ${Math.round(Math.min(1,s/9)*100)}%,var(--hi))`;face.style.setProperty("--amp",amp);bar.style.setProperty("--amp",amp);bar.classList.add("scr");fill.style.background=col;SEGS.forEach(g=>{g.style.background=col;g.style.setProperty("--amp",amp)});GRAF=requestAnimationFrame(step)};GRAF=requestAnimationFrame(step);
   holdEnd(e,()=>{cancelAnimationFrame(GRAF);const s=(performance.now()-t0)/1000;face.classList.remove("scr");face.innerHTML=blessFace("^");fill.style.width="0";fill.style.background="";bar.classList.remove("full","scr");SEGS.forEach(x=>{x.style.opacity=0;setTimeout(()=>x.remove(),600)});SEGS=[];
     tx.textContent=s<1?"A tiny one. That's allowed too.":s<4?"Good scream. Shoulders down, jaw unclenched ✦":"That was a big one. Hope some of it came out ✦"});}
-function screamClick(e){const fc=e.target.closest(".scface");if(fc){fc.classList.remove("boop");void fc.offsetWidth;fc.classList.add("boop");return}if(!e.target.closest("[data-smash]"))return;const f=$("sheetForm"),ta=f.querySelector("[data-worry]"),box=f.querySelector("[data-smashbox]"),txt=ta.value.trim();if(!txt){toast("Type something to smash first.");return}
-  ta.value="";box.innerHTML="";const pane=document.createElement("div");pane.className="pane";[...txt.slice(0,280)].forEach(ch=>{const s=document.createElement("span");s.textContent=ch;pane.appendChild(s)});box.appendChild(pane);
+function screamClick(e){const fc=e.target.closest(".scface");if(fc){tapHehe(fc);return}if(!e.target.closest("[data-smash]"))return;const f=$("sheetForm"),ta=f.querySelector("[data-worry]"),bub=f.querySelector(".thought"),txt=ta.value.trim();if(!txt){toast("Type something to smash first.");return}
+  ta.value="";ta.style.visibility="hidden";const pane=document.createElement("div");pane.className="pane inb";[...txt.slice(0,280)].forEach(ch=>{const s=document.createElement("span");s.textContent=ch;pane.appendChild(s)});bub.appendChild(pane);
   const red=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   setTimeout(()=>{pane.classList.add("crack");setTimeout(()=>{[...pane.children].forEach(s=>{if(red||!s.animate){s.style.opacity=0;return}const dx=(Math.random()-.5)*360,dy=120+Math.random()*260,r=(Math.random()-.5)*720;
       s.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${dx}px,${dy}px) rotate(${r}deg)`,opacity:0}],{duration:900+Math.random()*700,easing:"cubic-bezier(.2,.5,.6,1)",fill:"forwards"})});
-    setTimeout(()=>{box.innerHTML=`<p class="smashed">Smashed ✦ You don't have to carry that right now.</p>`},1700)},350)},450)}
+    setTimeout(()=>{pane.remove();ta.style.visibility="";const ph="What's Hehe worrying about? Type it here…";ta.placeholder="Smashed ✦ You don't have to carry that right now.";const fc=f.querySelector(".scface");if(fc&&!fc.dataset.boom)fc.innerHTML=blessFace("^");setTimeout(()=>{if(ta.placeholder!==ph)ta.placeholder=ph},4500)},1700)},350)},450)}
 /* ---- game hub ---- */
 function regTags(tg){const cfg=tagCfg(),miss=tg.filter(t=>!cfg.some(x=>x.name===t));if(miss.length){const m=mergedTags();S.settings.tags=m.concat(miss.filter(t=>!m.some(x=>x.name===t)).map(t=>({name:t,sh:tagSh(t)})));saveSettings(false)}return tg}
 function shiftExp(E,at){if(!E||E.seedAt===at)return;const E2=clone(E);E2.seedAt=at;save("exps",E2);movePlan(E.id,at);
