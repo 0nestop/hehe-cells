@@ -509,7 +509,11 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 .callout{border-color:var(--tq)!important;background:color-mix(in srgb,var(--tq) 12%,var(--bg))!important}
 .top{border-bottom:3px solid transparent!important;border-image:linear-gradient(90deg,var(--hi) 0 40%,var(--pk) 40% 60%,var(--yl) 60% 80%,var(--tq) 80%) 1!important}
 .ttl .c0{color:var(--hi)}.ttl .c1{color:var(--pk)}.ttl .c2{color:#e0a400}.ttl .c3{color:#1fa5a9}
-.crows.k-flask{border-color:var(--pk)!important}.sect.s-flask{color:color-mix(in srgb,#c2255c 70%,var(--fg))}
+.crows.k-flask{border-color:var(--pk)!important}
+.crows.k-flask .ic,.crows.k-flask .car,.crows.k-flask .sub,.crows.k-flask .sep{color:#d6336c!important;stroke:currentColor}
+.lineblk details.exp .ic,.lineblk details.exp>summary .car,.lineblk details.exp>summary .sub,.lineblk details.exp>summary .sep{color:#1fa5a9!important}
+.lineblk details.exp[data-st="planning"] .ic,.lineblk details.exp[data-st="planning"]>summary .car,.lineblk details.exp[data-st="planning"]>summary .sub,.lineblk details.exp[data-st="planning"]>summary .sep{color:#d39b00!important}
+.lineblk details.exp .crows{border-color:color-mix(in srgb,#1fa5a9 60%,transparent)}.sect.s-flask{color:color-mix(in srgb,#c2255c 70%,var(--fg))}
 .lineblk details.exp{border-color:#1fa5a9!important;border-left-width:4px}.lineblk details.exp[data-st="planning"]{border-color:#e0a400!important}.sect.s-exp{color:color-mix(in srgb,#1fa5a9 75%,var(--fg))}
 .callout .btn.solid{background:#1f9ea2;border-color:#1f9ea2;color:#fff}.callout .btn:not(.solid){border-color:#1f9ea2;color:color-mix(in srgb,#1f9ea2 80%,var(--fg));background:var(--bg)}.callout b{color:color-mix(in srgb,#1f9ea2 70%,var(--fg))}
 
@@ -537,7 +541,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.14",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.15",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1040,7 +1044,7 @@ function cRow(C,sel){
     <div class="l2">${chipsFor(C)}</div></div>`}
 function expRow(E,plates){const act=plates.filter(c=>c.status==="active").length,pl=plates.filter(c=>c.status==="planned").length,st=expStatus(E);
   const rem=plates.flatMap(nextRem).sort((a,b)=>a.d-b.d);
-  return`<details class="exp" data-st="${st}"><summary>${ICON.exp}<div class="cm"><div class="l1">${tagOne(E.tags)}<b>${esc(E.name)}</b></div></div><span class="car">›</span>
+  return`<details class="exp" data-st="${st}"><summary>${ICON.exp}<div class="cm"><div class="l1">${tagOne(E.tags)}<b>${esc(E.name)}</b>${st==="planning"?`<span class="spill" data-st="planning">Planning</span>`:""}</div></div><span class="car">›</span>
     <div class="l2"><span class="chip">${plates.length} plate${plates.length===1?"":"s"}</span>${pl?`<span class="chip">${pl} planned</span>`:""}${rem.length&&st!=="planning"?`<span class="chip${sod(rem[0].d)<=sod(Date.now())?" d":""}">${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}</span>`:""}</div></summary>
     <div class="xin"><div class="crows">${plates.map(c=>cRow(c)).join("")}</div><div><button class="btn sm" data-act="openExp" data-exp="${E.id}">Open experiment</button></div></div></details>`}
 function renderCultures(){
@@ -1320,7 +1324,7 @@ function plateIcon(vessel,faded){const f=VDEF[vessel];if(!f||!f.r)return"";const
   return`<svg class="pic${faded?" off":""}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(vessel)}"><title>${esc(vessel)}</title><rect x=".6" y=".6" width="${W-1.2}" height="${H-1.2}" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.1"/><g fill="currentColor">${d}</g></svg>`}
 function expCard(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl"),st=expStatus(E),rem=st==="planning"||st==="done"?[]:ps.filter(c=>c.status!=="ended").flatMap(nextRem).sort((a,b)=>a.d-b.d);
   return`<div role="button" tabindex="0" class="ecard" data-st="${st}" data-act="openExp" data-exp="${E.id}"><span class="eq"><button type="button" class="btn ghost sm" data-act="qDoc" data-exp="${E.id}" aria-label="Download protocol for ${esc(E.name)}">Protocol ⤓</button><button type="button" class="btn ghost sm" data-act="qRun" data-exp="${E.id}" aria-label="Export ${esc(E.name)} for Hehe.. Run">Run ⤓</button></span>${(()=>{const tg=sortTags(E.tags||[]),pill=`<span class="spill" data-st="${st}">${STL[st]}</span>`,lns=[...new Set(ps.flatMap(plateLines))].map(id=>S.lines[id]).filter(Boolean).map(L=>L.name);
-    return`${ps.length?`<span class="picons">${ps.slice().sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true})).map(P=>plateIcon(P.vessel,P.status==="ended"&&st!=="done")).join("")}</span>`:""}<span class="l1 e1">${tg.length?tagSet([tg[0]]):""}<b class="${tg.length?"enm":""}">${esc(E.name)}</b>${tg.length>1?"":pill}</span>${tg.length>1?`<span class="l1">${tagSet(tg.slice(1))}${pill}</span>`:""}${lns.length?`<span class="elines">${lns.map(esc).join(" · ")}</span>`:""}`})()}
+    return`${ps.length?`<span class="picons">${ps.slice().sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true})).map(P=>plateIcon(P.vessel,P.status==="ended"&&st!=="done")).join("")}</span>`:""}<span class="l1 e1">${tg.length?tagSet([tg[0]]):""}<b class="${tg.length?"enm":""}">${esc(E.name)}</b>${pill}</span>${tg.length>1?`<span class="l1">${tagSet(tg.slice(1))}</span>`:""}${lns.length?`<span class="elines">${lns.map(esc).join(" · ")}</span>`:""}`})()}
     <span class="sub">${st==="planning"&&E.seedAt?`seed ${sdd(E.seedAt)}`:""}${rem.length?`${st==="planning"&&E.seedAt?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}</span></div>`}
 function renderPlates(){renderPlates0();tlInit($("tab-plates"))}
 function renderPlates0(){
