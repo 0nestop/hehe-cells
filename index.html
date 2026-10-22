@@ -498,6 +498,20 @@ nav{border-radius:var(--r);overflow:hidden}
 .week{border-radius:var(--r);overflow:hidden}
 #tab-cultures>.bh{flex-wrap:wrap;gap:8px}#tab-cultures [data-cview]{max-width:none!important;flex:1 1 100%!important}#tab-cultures>.bh>.row{margin-left:auto}.ev{border-radius:6px}.tdbtn .when{border-radius:6px}
 .copy code{border-radius:var(--rs)}
+/* accent palette */
+:root{--pk:#e66a96;--lv:#bd97cb;--yl:#f9c642;--tq:#6ad3d6}
+.top{border-bottom:3px solid transparent!important;border-image:linear-gradient(90deg,var(--hi) 0 40%,var(--pk) 40% 60%,var(--yl) 60% 80%,var(--tq) 80%) 1!important}
+h2::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pk);margin-right:7px;vertical-align:1px}
+h2:nth-of-type(4n+2)::before{background:var(--yl)}h2:nth-of-type(4n+3)::before{background:var(--tq)}h2:nth-of-type(4n+4)::before{background:var(--lv)}
+details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:nth-of-type(4n+2) h2::before{background:var(--yl)}details.setsec:nth-of-type(4n+3) h2::before{background:var(--tq)}details.setsec:nth-of-type(4n+4) h2::before{background:var(--lv)}
+nav button{box-shadow:inset 0 -3px 0 var(--acc,transparent)}nav button:nth-child(1){--acc:var(--pk)}nav button:nth-child(2){--acc:var(--yl)}nav button:nth-child(3){--acc:var(--tq)}nav button:nth-child(4){--acc:var(--lv)}nav button:nth-child(5){--acc:color-mix(in srgb,var(--hi) 60%,transparent)}
+.day.td{background:color-mix(in srgb,var(--yl) 22%,var(--bg))!important}.day.td .dh{color:color-mix(in srgb,#b07d00 80%,var(--fg))}
+.bknudge{border-color:var(--yl)!important;background:color-mix(in srgb,var(--yl) 12%,transparent)}
+.empty{border-color:var(--pk)!important;background:color-mix(in srgb,var(--pk) 6%,transparent)}
+.callout{border-color:var(--tq)!important;background:color-mix(in srgb,var(--tq) 12%,var(--bg))!important}
+.madeby span{background:linear-gradient(90deg,var(--hi),var(--pk),#d9a400,#2bb3b7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+#toast{background:linear-gradient(90deg,var(--hi),color-mix(in srgb,var(--hi) 70%,var(--pk)))}
+.tlscroll{overflow-y:hidden!important}.tln.ax,.tl2 .tr.ax{height:36px!important}
 </style>
 
 <div class="wrap">
@@ -519,7 +533,7 @@ nav{border-radius:var(--r);overflow:hidden}
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.11",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.12",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
