@@ -548,7 +548,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.16",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.17",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -664,12 +664,13 @@ async function initStore(){
 /* ================= biology maths ================= */
 function lineStats(L){
   const recs=(L&&L.records)||[];
-  const td=recs.filter(r=>r.seeded>0&&r.harvested>r.seeded&&r.hours>0).map(r=>r.hours*Math.LN2/Math.log(r.harvested/r.seeded));
+  const okT=r=>r.seeded>0&&r.harvested>r.seeded&&r.hours>0,tdOf=r=>r.hours*Math.LN2/Math.log(r.harvested/r.seeded),grow=recs.filter(r=>okT(r)&&!(r.pct>=95)),plat=recs.filter(r=>okT(r)&&r.pct>=95);
+  const tdRecs=grow.length?grow:plat,td=tdRecs.map(tdOf),tdRough=!grow.length&&plat.length>0;
   const cd=recs.filter(r=>r.pct>=50&&r.area>0&&r.harvested>0).map(r=>r.harvested/(r.pct/100)/r.area);
-  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+  const avg=a=>{if(!a.length)return NaN;const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
   const tdM=L&&num(L.tdManual)>0,cdM=L&&num(L.confCells)>0&&L.confVessel;
-  return{td:tdM?num(L.tdManual):avg(td),tdSrc:tdM?"set by you":td.length?`learned from ${td.length} passage${td.length>1?"s":""}`:"",
-    cd:cdM?num(L.confCells)/V(L.confVessel).a:avg(cd),cdSrc:cdM?"set by you":cd.length?`learned from ${cd.length} passage${cd.length>1?"s":""}`:""}
+  return{td:tdM?num(L.tdManual):avg(td),tdSrc:tdM?"set by you":td.length?`median of ${td.length} passage${td.length>1?"s":""}${tdRough?" (all harvested at full confluence, so rough)":""}`:"",
+    cd:cdM?num(L.confCells)/V(L.confVessel).a:avg(cd),cdSrc:cdM?"set by you":cd.length?`median of ${cd.length} passage${cd.length>1?"s":""}`:""}
 }
 const cArea=C=>num(C.area)>0?num(C.area):V(C.vessel).a;
 function confNow(C,at=Date.now()){const L=S.lines[C.lineId];if(!L||!(C.seeded>0)||C.status!=="active")return NaN;const s=lineStats(L);
@@ -1081,8 +1082,8 @@ function renderCultures(){
       <tr><th>Media change</th><td>${num(L.mediaEvery)>0?`every ${num(L.mediaEvery)} d`:L.mediaEvery!=null&&L.mediaEvery!==""?"none (set to 0)":"—"}${S.settings.skipWeekends?"<small>weekends moved to Fri/Mon</small>":""}</td></tr></table></div>
       ${L.notes?`<p class="pre">${esc(L.notes)}</p>`:""}
       ${(L.log||[]).length?`<h2>History notes</h2><div class="list">${L.log.slice().reverse().slice(0,15).map(n=>`<div class="li"><span class="when">${sdd(n.d)}</span><span class="what">${esc(n.t)}</span></div>`).join("")}</div>`:""}
-      ${(L.records||[]).length?`<h2>Passage records</h2><div class="tw"><table class="mini"><thead><tr><th>Date</th><th>Vessel</th><th>Seeded → harvested</th><th>h</th><th>Conf.</th><th></th></tr></thead><tbody>
-        ${L.records.map((r,ix)=>({r,ix})).reverse().map(({r,ix})=>`<tr><td>${sdd(r.d)}</td><td>${esc(r.vessel||"")}</td><td>${cells(r.seeded)} → ${cells(r.harvested)}</td><td>${Math.round(r.hours)}</td><td>${r.pct?r.pct+"%":"—"}</td><td><button class="btn ghost sm" data-act="rmRec" data-id="${L.id}" data-ix="${ix}" aria-label="Delete record">×</button></td></tr>`).join("")}</tbody></table></div>`:""}
+      ${(L.records||[]).length?`<h2>Passage records</h2><div class="tw"><table class="mini"><thead><tr><th>Date</th><th>Vessel</th><th>Seeded → harvested</th><th>h</th><th>Conf.</th><th>Td</th><th></th></tr></thead><tbody>
+        ${L.records.map((r,ix)=>({r,ix})).reverse().map(({r,ix})=>`<tr><td>${sdd(r.d)}</td><td>${esc(r.vessel||"")}</td><td>${cells(r.seeded)} → ${cells(r.harvested)}</td><td>${Math.round(r.hours)}</td><td>${r.pct?r.pct+"%":"—"}</td><td>${r.seeded>0&&r.harvested>r.seeded&&r.hours>0?Math.round(r.hours*Math.LN2/Math.log(r.harvested/r.seeded))+" h"+(r.pct>=95?"<small>plateau</small>":""):"<small>not used</small>"}</td><td><button class="btn ghost sm" data-act="rmRec" data-id="${L.id}" data-ix="${ix}" aria-label="Delete record">×</button></td></tr>`).join("")}</tbody></table></div>`:""}
       </div></details>`:""}
     ${cs.length?sections(cs):`<p class="note">${cview==="active"?"No flasks or plates of this line yet.":"Nothing ended yet."}</p>`}
     ${cview==="active"?`<div class="row"><button class="btn sm solid" data-act="addFlask" data-id="${L.id}">+ Culture</button></div>`:""}</div></details>`});
