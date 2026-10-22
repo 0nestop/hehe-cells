@@ -451,6 +451,29 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 @media (prefers-reduced-motion:reduce){.mist,.gplus{animation:none}.bug,.bub,.gfill{transition:none}}
 @media (prefers-reduced-motion:reduce){.calmcell.boop,.calmfx span{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* rounded theme */
+:root{--r:12px;--rs:8px;--rp:999px}
+.btn{border-radius:var(--rs)}
+.btn.sm{border-radius:7px}
+input:not([type=checkbox]):not([type=radio]),select,textarea{border-radius:var(--rs)}
+.unit input{border-radius:var(--rs) 0 0 var(--rs)}.unit em{border-radius:0 var(--rs) var(--rs) 0}
+table.set td input:not([type=checkbox]),table.rx td input,table.rx td select{border-radius:0}
+input[type=checkbox]{border-radius:5px}
+nav{border-radius:var(--r);overflow:hidden}
+.seg{border-radius:var(--rs);overflow:hidden}
+.list,.crows,.block,details.exp,.inner,.empty,.callout,.bknudge,.bxcard,.bxsum,.sxp,.over,.donebox{border-radius:var(--r)}
+.list,.crows,details.exp{overflow:hidden}
+.block .list,.inner .list,.list .list{border-radius:var(--rs)}
+.tw{border-radius:var(--rs)}.tw table{border-radius:var(--rs);overflow:hidden;border-collapse:separate;border-spacing:0}
+.tw table th,.tw table td{border-width:0 1px 1px 0}.tw table tr>*:first-child{border-left-width:1px}.tw table tr:first-child>*{border-top-width:1px}
+.tw table tr:first-child>*:first-child{border-top-left-radius:var(--rs)}.tw table tr:first-child>*:last-child{border-top-right-radius:var(--rs)}
+.tw table tr:last-child>*:first-child{border-bottom-left-radius:var(--rs)}.tw table tr:last-child>*:last-child{border-bottom-right-radius:var(--rs)}
+#sheet .panel{border-radius:18px 18px 0 0}
+.etag{border-radius:var(--rp)}.spill{border-radius:var(--rp)}.pchip{border-radius:var(--rp)}
+#toast{border-radius:var(--r)}
+.week{border-radius:var(--r);overflow:hidden}
+#tab-cultures>.bh{flex-wrap:wrap;gap:8px}#tab-cultures [data-cview]{max-width:none!important;flex:1 1 100%!important}#tab-cultures>.bh>.row{margin-left:auto}.ev{border-radius:6px}.tdbtn .when{border-radius:6px}
+.copy code{border-radius:var(--rs)}
 </style>
 
 <div class="wrap">
@@ -472,7 +495,7 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.8",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.9",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
