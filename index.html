@@ -510,11 +510,18 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 .top{border-bottom:3px solid transparent!important;border-image:linear-gradient(90deg,var(--hi) 0 40%,var(--pk) 40% 60%,var(--yl) 60% 80%,var(--tq) 80%) 1!important}
 .ttl .c0{color:var(--hi)}.ttl .c1{color:var(--pk)}.ttl .c2{color:#e0a400}.ttl .c3{color:#1fa5a9}
 .crows.k-flask{border-color:var(--pk)!important}
-.crows.k-flask .ic,.crows.k-flask .car,.crows.k-flask .sub,.crows.k-flask .sep{color:#d6336c!important;stroke:currentColor}
-.lineblk details.exp .ic,.lineblk details.exp>summary .car,.lineblk details.exp>summary .sub,.lineblk details.exp>summary .sep{color:#1fa5a9!important}
-.lineblk details.exp[data-st="planning"] .ic,.lineblk details.exp[data-st="planning"]>summary .car,.lineblk details.exp[data-st="planning"]>summary .sub,.lineblk details.exp[data-st="planning"]>summary .sep{color:#d39b00!important}
-.lineblk details.exp .crows{border-color:color-mix(in srgb,#1fa5a9 60%,transparent)}.sect.s-flask{color:color-mix(in srgb,#c2255c 70%,var(--fg))}
-.lineblk details.exp{border-color:#1fa5a9!important;border-left-width:4px}.lineblk details.exp[data-st="planning"]{border-color:#e0a400!important}.sect.s-exp{color:color-mix(in srgb,#1fa5a9 75%,var(--fg))}
+:root{--fk:#c92a6a;--ex:#178f93;--plc:#b88400}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fk:#f4a6c3;--ex:#8fe0e2;--plc:#f7d27a}}
+:root[data-theme="dark"]{--fk:#f4a6c3;--ex:#8fe0e2;--plc:#f7d27a}
+.crows.k-flask .btn,.crows.k-flask select.menu{border-color:var(--fk)!important;color:var(--fk)!important}
+.lineblk details.exp .crows .btn,.lineblk details.exp .crows select.menu,.lineblk details.exp .xin>div>.btn{border-color:var(--ex)!important;color:var(--ex)!important}
+.lineblk details.exp[data-st="planning"] .crows .btn,.lineblk details.exp[data-st="planning"] .crows select.menu,.lineblk details.exp[data-st="planning"] .xin>div>.btn{border-color:var(--plc)!important;color:var(--plc)!important}
+.lineblk details.exp .crows .ic,.lineblk details.exp .crows .sub,.lineblk details.exp .crows .sep{color:var(--ex)!important}.lineblk details.exp[data-st="planning"] .crows .ic,.lineblk details.exp[data-st="planning"] .crows .sub,.lineblk details.exp[data-st="planning"] .crows .sep{color:var(--plc)!important}
+.crows.k-flask .ic,.crows.k-flask .car,.crows.k-flask .sub,.crows.k-flask .sep{color:var(--fk)!important;stroke:currentColor}
+.lineblk details.exp .ic,.lineblk details.exp>summary .car,.lineblk details.exp>summary .sub,.lineblk details.exp>summary .sep{color:var(--ex)!important}
+.lineblk details.exp[data-st="planning"] .ic,.lineblk details.exp[data-st="planning"]>summary .car,.lineblk details.exp[data-st="planning"]>summary .sub,.lineblk details.exp[data-st="planning"]>summary .sep{color:var(--plc)!important}
+.lineblk details.exp .crows{border-color:color-mix(in srgb,#1fa5a9 60%,transparent)}.sect.s-flask{color:var(--fk)}
+.lineblk details.exp{border-color:#1fa5a9!important;border-left-width:4px}.lineblk details.exp[data-st="planning"]{border-color:#e0a400!important}.sect.s-exp{color:var(--ex)}
 .callout .btn.solid{background:#1f9ea2;border-color:#1f9ea2;color:#fff}.callout .btn:not(.solid){border-color:#1f9ea2;color:color-mix(in srgb,#1f9ea2 80%,var(--fg));background:var(--bg)}.callout b{color:color-mix(in srgb,#1f9ea2 70%,var(--fg))}
 
 .madeby span{background:linear-gradient(90deg,var(--hi),var(--pk),#d9a400,#2bb3b7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
@@ -541,7 +548,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.1.15",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.1.16",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
