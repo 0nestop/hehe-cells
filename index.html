@@ -552,7 +552,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.2.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.2.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -2696,14 +2696,17 @@ document.addEventListener("touchmove",e=>{if(DRAG&&e.cancelable)e.preventDefault
 function heheDivide(m){if(m.dataset.div)return;m.dataset.div=1;const inner=mascot(64,"").replace(/^[\s\S]*?<svg[^>]*>/,"").replace(/<\/svg>\s*$/,"");
   const cell=k=>`<g class="dvc" data-k="${k}"><g transform="translate(-32,-34)">${inner}</g></g>`;
   const sz=m.firstElementChild?m.firstElementChild.getAttribute("width")||38:38;
-  m.innerHTML=`<svg width="${sz}" height="${sz}" viewBox="0 0 64 64" style="overflow:visible" aria-hidden="true"><g class="dvz">${cell(0)}${cell(1)}${cell(2)}${cell(3)}</g></svg>`;
-  const T=(x,y,s)=>`translate(${x}px,${y}px) scale(${s})`,c=[...m.querySelectorAll(".dvc")],D=2400,o={duration:D,easing:"ease-in-out",fill:"forwards"};
-  c[0].animate([{transform:T(32,34,1),offset:0},{transform:T(32,34,1.06),offset:.12},{transform:T(19,34,.55),offset:.32},{transform:T(19,34,.55),offset:.48},{transform:T(19,21,.4),offset:.66},{transform:T(19,21,.4),offset:1}],o);
-  c[1].animate([{transform:T(32,34,1),opacity:0,offset:0},{transform:T(32,34,1),opacity:1,offset:.13},{transform:T(45,34,.55),opacity:1,offset:.32},{transform:T(45,34,.55),offset:.48},{transform:T(45,21,.4),offset:.66},{transform:T(45,21,.4),opacity:1,offset:1}],o);
-  c[2].animate([{transform:T(19,34,.55),opacity:0,offset:0},{transform:T(19,34,.55),opacity:0,offset:.47},{transform:T(19,34,.55),opacity:1,offset:.49},{transform:T(19,47,.4),opacity:1,offset:.66},{transform:T(19,47,.4),opacity:1,offset:1}],o);
-  c[3].animate([{transform:T(45,34,.55),opacity:0,offset:0},{transform:T(45,34,.55),opacity:0,offset:.47},{transform:T(45,34,.55),opacity:1,offset:.49},{transform:T(45,47,.4),opacity:1,offset:.66},{transform:T(45,47,.4),opacity:1,offset:1}],o);
-  m.querySelector(".dvz").animate([{transform:"translate(0px,0px) scale(1)",offset:0},{transform:"translate(0px,0px) scale(1)",offset:.74},{transform:"translate(-15.5px,-18.5px) scale(2.5)",offset:.95},{transform:"translate(-15.5px,-18.5px) scale(2.5)",offset:1}],o);
-  setTimeout(()=>{m.innerHTML=mascot(sz,"happy");delete m.dataset.div},D+40)}
+  m.innerHTML=`<svg width="${sz}" height="${sz}" viewBox="0 0 64 64" style="overflow:hidden;display:block" aria-hidden="true"><g class="dvz">${cell(3)}${cell(2)}${cell(1)}${cell(0)}</g></svg>`;
+  const T=(x,y,sx,sy)=>`translate(${x}px,${y}px) scale(${sx},${sy??sx})`,c=[...m.querySelectorAll(".dvc")].sort((a,b)=>a.dataset.k-b.dataset.k),D=2600,POP="cubic-bezier(.3,1.7,.55,1)",SQ="ease-in";
+  const K=(fr)=>fr.map(([o,t,op,e])=>Object.assign({offset:o,transform:t},op!=null?{opacity:op}:{},e?{easing:e}:{}));
+  const A=(el,fr)=>el.animate(K(fr),{duration:D,fill:"forwards"});
+  // 1 cell -> pinch -> snap into 2 -> pinch -> snap into 4 -> zoom
+  A(c[0],[[0,T(32,34,1),1,SQ],[.14,T(32,34,1.08,.9),1,SQ],[.2,T(27,34,.78,.8),1,POP],[.27,T(18.5,34,.58),1,"ease-out"],[.33,T(18.5,34,.6,.56),1,"ease-in-out"],[.4,T(18.5,34,.58),1,SQ],[.47,T(18.5,30,.5,.56),1,POP],[.54,T(22,24,.42),1],[1,T(22,24,.42),1]]);
+  A(c[1],[[0,T(32,34,1),0],[.14,T(32,34,1.08,.9),0,SQ],[.2,T(37,34,.78,.8),1,POP],[.27,T(45.5,34,.58),1,"ease-out"],[.33,T(45.5,34,.6,.56),1,"ease-in-out"],[.4,T(45.5,34,.58),1,SQ],[.47,T(45.5,30,.5,.56),1,POP],[.54,T(42,24,.42),1],[1,T(42,24,.42),1]]);
+  A(c[2],[[0,T(18.5,34,.58),0],[.4,T(18.5,34,.58),0,SQ],[.47,T(18.5,38,.5,.56),1,POP],[.54,T(22,44,.42),1],[1,T(22,44,.42),1]]);
+  A(c[3],[[0,T(45.5,34,.58),0],[.4,T(45.5,34,.58),0,SQ],[.47,T(45.5,38,.5,.56),1,POP],[.54,T(42,44,.42),1],[1,T(42,44,.42),1]]);
+  m.querySelector(".dvz").animate([{offset:0,transform:"translate(0px,0px) scale(1)"},{offset:.58,transform:"translate(0px,0px) scale(1)"},{offset:.62,transform:"translate(0px,0px) scale(1.04)",easing:"ease-in"},{offset:.7,transform:"translate(0px,0px) scale(1)",easing:"cubic-bezier(.5,0,.2,1)"},{offset:.86,transform:"translate(-20.8px,-23.6px) scale(2.4)"},{offset:1,transform:"translate(-20.8px,-23.6px) scale(2.4)"}],{duration:D,fill:"forwards"});
+  setTimeout(()=>{m.innerHTML=mascot(sz,"happy");delete m.dataset.div;m.classList.remove("bounce");void m.offsetWidth;m.classList.add("bounce")},D+30)}
 
 function renderData(){
   const ae=document.activeElement,typing=ae&&ae.matches&&ae.matches("input,select,textarea")&&!ae.matches("select.menu");
