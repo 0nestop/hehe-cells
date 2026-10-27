@@ -471,6 +471,8 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 .dragging{opacity:.85;box-shadow:0 8px 20px rgba(40,20,80,.22);position:relative;z-index:30;transform:scale(1.01)}html.dragsort,html.dragsort *{user-select:none!important;-webkit-user-select:none!important}
 .ecard .egrip{position:absolute;left:6px;top:50%;translate:0 -50%;padding:8px 4px}.ecard{padding-left:24px!important}
 .lineblk>summary .grip{margin-right:2px}
+.ecard[data-ph="act"]{border-left-color:#1fa5a9!important}.spill[data-ph="act"]{background:#1fa5a9!important;color:#fff!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .spill[data-ph="act"]{background:#5fd0d3!important;color:#0d2a2b!important}:root:not([data-theme="light"]) .ecard[data-ph="act"]{border-left-color:#5fd0d3!important}}
 @media (prefers-reduced-motion:reduce){.rain{animation:none}}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
 @media (prefers-reduced-motion:reduce){.scface.scr,.pane.crack{animation:none}}
@@ -530,7 +532,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 
 .madeby span{background:linear-gradient(90deg,var(--hi),var(--pk),#d9a400,#2bb3b7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
 #toast{background:linear-gradient(90deg,var(--hi),color-mix(in srgb,var(--hi) 70%,var(--pk)))}
-.tlscroll{overflow-y:hidden!important}.tln.ax,.tl2 .tr.ax{height:36px!important}
+.tlscroll{overflow-y:hidden!important}.tln.ax,.tl2 .tr.ax{height:46px!important}.tk small.wd{font-size:9px;font-weight:600;margin-bottom:1px}
 </style>
 
 <div class="wrap">
@@ -552,7 +554,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.2.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.3.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -633,7 +635,7 @@ function persistLocal(){ls.set("bench-data",{lines:S.lines,cultures:S.cultures,e
 function write(path,body){if(!DB){persistLocal();return}
   wq[path]=(wq[path]||Promise.resolve()).then(()=>body?DB.doc(path).set(JSON.parse(JSON.stringify(body))):DB.doc(path).delete()).catch(e=>
     toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete old ended cultures to free space.":"Couldn't save. Check your connection and try again."))}
-function save(coll,obj){S[coll][obj.id]=obj;renderData();write(coll+"/"+obj.id,obj)}
+function save(coll,obj){S[coll][obj.id]=obj;renderData();write(coll+"/"+obj.id,obj);if(coll==="cultures"&&!obj.layout&&!FIXING){clearTimeout(save.ft);save.ft=setTimeout(fixFlaskNames,80)}}
 function remove(coll,id){delete S[coll][id];renderData();write(coll+"/"+id,null)}
 let setTimer=null;
 function saveSettings(rerender=true){if(rerender)renderData();clearTimeout(setTimer);setTimer=setTimeout(()=>write("settings/main",S.settings),500)}
@@ -700,7 +702,7 @@ function regen(P){resolveTimes(P);const old=Object.fromEntries((P.reminders||[])
   (P.treatments||[]).forEach(T=>{if(T.remind&&T.at)keep.push({id:"t_"+T.id,tid:T.id,kind:"Treatment",t:T.name,d:T.at,done:!!old["t_"+T.id]?.done})});
   (P.harvests||[]).forEach(Hv=>{const at=harvestAt(P,Hv);if(Hv.remind&&at)keep.push({id:"h_"+Hv.id,hid:Hv.id,kind:"Harvest",t:Hv.note||"",d:at,done:!!old["h_"+Hv.id]?.done})});
   P.reminders=keep;return P}
-function harvestAt(P,Hv){const ms=(num(Hv.after)||0)*(Hv.unit==="d"?DAY:H);
+function harvestAt(P,Hv){const ms=(num(Hv.after)||0)*(Hv.unit==="d"?DAY:Hv.unit==="min"?6e4:H);
   if(Hv.from==="seed")return P.seededAt+ms;const T=(P.treatments||[]).find(t=>t.id===Hv.from);return T&&T.at?T.at+ms:null}
 function nextRem(C){return(C.reminders||[]).filter(r=>!r.done).sort((a,b)=>a.d-b.d)}
 
@@ -1107,8 +1109,9 @@ let openExp=ls.get("openExp","");let openPlate=ls.get("openPlate",null);const se
 let expSeg=ls.get("expSeg","active"),pmode=ls.get("pmode","cond"),editing=false,hlG=null,expTag=ls.get("expTag",""),expView=ls.get("expView","list");
 function expForm(E){const isNew=!E;E=E||{srcs:[]};const tp=S.settings.expTemplates||[];
   const flOpts=(ln,sel)=>{const act=flasksActive().filter(c=>!ln||c.lineId===ln),ended=Object.values(S.cultures).filter(c=>c.status==="ended"&&!c.layout&&(!ln||c.lineId===ln)&&(c.id===sel||Date.now()-(c.endedAt||0)<120*DAY)).sort((a,b)=>(b.endedAt||0)-(a.endedAt||0));
-    return`<option value="">—</option>`+(ended.length?`<optgroup label="Passaged (ended)">${ended.map(c=>`<option value="${c.id}"${c.id===sel?" selected":""}>${esc(srcName(c))} · ended ${sdd(c.endedAt)}</option>`).join("")}</optgroup>`:"")+(act.length?`<optgroup label="Still growing">${act.map(c=>`<option value="${c.id}"${c.id===sel?" selected":""}>${esc(srcName(c))}</option>`).join("")}</optgroup>`:"")};
-  const rows=[0,1,2,3].map(i=>{const s=(E.srcs||[])[i]||{};return`<div class="grid" style="grid-template-columns:1fr 1.3fr"><label>${i?"":"Cell line"}<select name="l${i}" class="txt">${lineOpts(s.lineId||"")}</select></label>
+    return`<option value="">—</option>`+(act.length?`<optgroup label="Still growing">${act.map(c=>`<option value="${c.id}"${c.id===sel?" selected":""}>${esc(srcName(c))}</option>`).join("")}</optgroup>`:"")+(ended.length?`<optgroup label="Passaged (ended)">${ended.map(c=>`<option value="${c.id}"${c.id===sel?" selected":""}>${esc(srcName(c))} · ended ${sdd(c.endedAt)}</option>`).join("")}</optgroup>`:"")};
+  const srcs0=(()=>{const a=(E.srcs||[]).slice();if(E.id)Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout).forEach(P=>plateLines(P).forEach(ln=>{if(ln&&S.lines[ln]&&!a.some(x=>x.lineId===ln))a.push({lineId:ln,flaskId:""})}));return a.slice(0,4)})();
+  const rows=[0,1,2,3].map(i=>{const s=srcs0[i]||{};return`<div class="grid" style="grid-template-columns:1fr 1.3fr"><label>${i?"":"Cell line"}<select name="l${i}" class="txt">${lineOpts(s.lineId||"")}</select></label>
     <label>${i?"":"From flask (optional)"}<select name="f${i}" class="txt">${flOpts(s.lineId,s.flaskId)}</select></label></div>`}).join("");
   const hasPl=!isNew&&Object.values(S.cultures).some(c=>c.expId===E.id&&c.status==="planned");
   const tagSug=(()=>{const m=mergedTags().map(x=>x.name);return m.length?m:["WB","qPCR","PB"]})();
@@ -1259,7 +1262,7 @@ function timelineCore(lanesIn){
   const now=Date.now(),t0=sod(now),days=[...new Set(ev.map(x=>sod(x.d)).concat(t0))].sort((a,b)=>a-b),DW=44,GW=26;
   const segs=[];let u=0;days.forEach((d,i)=>{if(i&&d-days[i-1]>DAY){segs.push({gap:true,x:u,n:Math.round((d-days[i-1])/DAY)-1});u+=GW}segs.push({d,x:u});u+=DW});
   const off=Object.fromEntries(segs.filter(s=>!s.gap).map(s=>[s.d,s.x])),px=d=>off[sod(d)]+((d-sod(d))/DAY*.9+.05)*DW;
-  const ticks=segs.map(s=>s.gap?`<span class="tk gap" style="left:${s.x+GW/2}px">⋯<small>${s.n} d</small></span>`:`<span class="tk${s.d===t0?" tdy":""}" style="left:${s.x+DW/2}px">${new Date(s.d).getDate()}<small>${new Date(s.d).toLocaleDateString(undefined,{month:"short"})}</small></span>`).join("");
+  const ticks=segs.map(s=>s.gap?`<span class="tk gap" style="left:${s.x+GW/2}px">⋯<small>${s.n} d</small></span>`:`<span class="tk${s.d===t0?" tdy":""}" style="left:${s.x+DW/2}px"><small class="wd">${new Date(s.d).toLocaleDateString(undefined,{weekday:"short"})}</small>${new Date(s.d).getDate()}<small>${new Date(s.d).toLocaleDateString(undefined,{month:"short"})}</small></span>`).join("");
   const gaps=segs.filter(s=>s.gap).map(s=>`<span class="gp" style="left:${s.x}px;width:${GW}px"></span>`).join("");
   const nl=`<span class="now" style="left:${px(now).toFixed(1)}px" title="Now"></span>`;
   const names=lanesIn.map(P=>`<div class="tln"${P.st?` data-st="${P.st}"`:""}>${tagOne(P.tags)}${P.id?`<button type="button" class="ln lnb" data-act="openExp" data-exp="${P.id}" title="Open ${esc(P.label)}">${esc(P.label)}</button>`:`<span class="ln" title="${esc(P.label)}">${esc(P.label)}</span>`}</div>`).join("");
@@ -1267,7 +1270,8 @@ function timelineCore(lanesIn){
   const hasSt=lanesIn.some(P=>P.st);
   return`<div class="tlw"><div class="tlfix"><div class="tln ax"></div>${names}</div><div class="tlscroll" data-tlnow="${Math.round(px(now))}"><div class="tl2" style="width:${u}px"><div class="tr ax">${gaps}${ticks}</div>${rows}</div></div></div>
   <div class="legend"><span><span class="mk seed st"></span>Seed</span><span><span class="mk treat st"></span>Action</span><span><span class="mk harv st"></span>Harvest</span><span><span class="now st"></span>Now</span><span class="sub">⋯ = quiet days · scroll sideways</span></div>`}
-function plateBody(C,E){const ci=condItems(C),li=lineItems(C),mi=markItems(C),a=cArea(C),v=num(C.mediumMl)||V(C.vessel).v,Hv=(C.harvests||[])[0],items=pmode==="cond"?ci:pmode==="line"?li:mi;
+function syncSrc(P,ln){const E=P.expId&&S.exps[P.expId];if(!E||!ln||!S.lines[ln]||(E.srcs||[]).some(x=>x.lineId===ln))return;const E2=clone(E);E2.srcs=(E2.srcs||[]).concat({lineId:ln,flaskId:""});save("exps",E2)}
+function plateBody(C,E){const ci=condItems(C),li=lineItems(C).concat(E?(E.srcs||[]).filter(x=>x.lineId&&S.lines[x.lineId]&&!lineItems(C).some(y=>y.key===x.lineId)).map(x=>({key:x.lineId,name:S.lines[x.lineId].name,ab:abbr(S.lines[x.lineId].name),n:0,cells:defaultSeed(S.lines[x.lineId],C.vessel)})):[]),mi=markItems(C),a=cArea(C),v=num(C.mediumMl)||V(C.vessel).v,Hv=(C.harvests||[])[0],items=pmode==="cond"?ci:pmode==="line"?li:mi;
   const menu=MENU[C.status==="planned"||C.status==="tpl"?"planned":C.status==="ended"?"ended":"plate"].filter(([k])=>k!=="openPlate"),ph=C.photos||[];
   const what=pmode==="cond"?"condition":pmode==="line"?"cell line":"group";
   return`<div class="bh"><p class="sub" style="margin:0">${esc(C.vessel)} · ${vol(v)} per well · ${wellsUsed(C)} wells</p>
@@ -1284,9 +1288,9 @@ function plateBody(C,E){const ci=condItems(C),li=lineItems(C),mi=markItems(C),a=
       ${E?"":`<div><span class="sub">Cell lines</span><div class="legend">${li.length?li.map(x=>`<span><b style="font-family:var(--mono)">${esc(x.ab)}</b> ${esc(x.name)} <span class="sub">${x.n} · ${cells(x.cells)}/well</span></span>`).join(""):`<span class="sub">none</span>`}</div></div>`}
       <div><span class="sub">Conditions</span><div class="legend">${condLegend(C,true)}</div></div>
 </div>`}
-    ${E?"":treatSection([C],false)}
+    ${E||!(C.treatments||[]).length?"":treatSection([C],false)}
     <h2>Harvest</h2>
-    ${Hv?(()=>{const at=harvestAt(C,Hv),T=(C.treatments||[]).find(t=>t.id===Hv.from);return`<div class="list"><div class="li"><span class="when">${at?sd(at)+"<br>"+st(at):"—"}</span><span class="what">${num(Hv.after)} ${Hv.unit==="d"?"days":"h"} after ${Hv.from==="seed"?"seeding":T?esc(T.name):"(removed treatment)"}<small>${Hv.note?esc(Hv.note)+" · ":""}${Hv.remind?"reminder on":"no reminder"}</small></span>
+    ${Hv?(()=>{const at=harvestAt(C,Hv),T=(C.treatments||[]).find(t=>t.id===Hv.from);return`<div class="list"><div class="li"><span class="when">${at?sd(at)+"<br>"+st(at):"—"}</span><span class="what">${num(Hv.after)} ${Hv.unit==="d"?"days":Hv.unit==="min"?"min":"h"} after ${Hv.from==="seed"?"seeding":T?esc(T.name):"(removed treatment)"}<small>${Hv.note?esc(Hv.note)+" · ":""}${Hv.remind?"reminder on":"no reminder"}</small></span>
       <select class="menu" data-hmenu="${Hv.id}" aria-label="Harvest actions"><option value="">⋯</option><option value="edit">Edit</option><option value="del">Delete</option></select></div></div>`})():`<div><button class="btn" data-act="harvest">+ Harvest</button></div>`}
     <h2>Photos</h2>
     <div class="row">${ph.length?`<div class="thumbs">${ph.slice(-4).reverse().map(p=>`<img src="/_blob/${esc(p.id)}" alt="${esc(p.note||"Plate photo")}" data-act="photos" data-id="${C.id}" loading="lazy">`).join("")}</div>`:""}<button class="btn sm" data-act="photos" data-id="${C.id}">${ph.length?`All photos (${ph.length})`:"+ Photo"}</button></div>
@@ -1337,8 +1341,9 @@ function tplDraftEnd(E,keep){if(keep){const obj=expTplObj(E);if(!obj.plates.leng
 function plateIcon(vessel,faded){const f=VDEF[vessel];if(!f||!f.r)return"";const W=32,H=22,px=3,py=3,dx=(W-2*px)/f.c,dy=(H-2*py)/f.r,r=Math.max(.38,Math.min(dx,dy)*(f.c>8?.26:.33));let d="";
   for(let i=0;i<f.r;i++)for(let j=0;j<f.c;j++)d+=`<circle cx="${(px+dx*(j+.5)).toFixed(2)}" cy="${(py+dy*(i+.5)).toFixed(2)}" r="${r.toFixed(2)}"/>`;
   return`<svg class="pic${faded?" off":""}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(vessel)}"><title>${esc(vessel)}</title><rect x=".6" y=".6" width="${W-1.2}" height="${H-1.2}" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.1"/><g fill="currentColor">${d}</g></svg>`}
+function expPhase(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&(c.status==="active"||c.status==="planned"));const rem=ps.flatMap(nextRem);return rem.some(r=>r.kind!=="Harvest")?"act":"harv"}
 function expCard(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl"),st=expStatus(E),rem=st==="planning"||st==="done"?[]:ps.filter(c=>c.status!=="ended").flatMap(nextRem).sort((a,b)=>a.d-b.d);
-  return`<div role="button" tabindex="0" class="ecard" data-st="${st}" data-act="openExp" data-exp="${E.id}" data-sid="${E.id}"><span class="grip egrip" data-grip aria-label="Drag to reorder">⠿</span><span class="eq"><button type="button" class="btn ghost sm" data-act="qDoc" data-exp="${E.id}" aria-label="Download protocol for ${esc(E.name)}">Protocol ⤓</button><button type="button" class="btn ghost sm" data-act="qRun" data-exp="${E.id}" aria-label="Export ${esc(E.name)} for Hehe.. Run">Run ⤓</button></span>${(()=>{const tg=sortTags(E.tags||[]),pill=`<span class="spill" data-st="${st}">${STL[st]}</span>`,lns=[...new Set(ps.flatMap(plateLines))].map(id=>S.lines[id]).filter(Boolean).map(L=>L.name);
+  const ph=st==="running"?expPhase(E):"";return`<div role="button" tabindex="0" class="ecard" data-st="${st}"${ph?` data-ph="${ph}"`:""} data-act="openExp" data-exp="${E.id}" data-sid="${E.id}"><span class="grip egrip" data-grip aria-label="Drag to reorder">⠿</span><span class="eq"><button type="button" class="btn ghost sm" data-act="qDoc" data-exp="${E.id}" aria-label="Download protocol for ${esc(E.name)}">Protocol ⤓</button><button type="button" class="btn ghost sm" data-act="qRun" data-exp="${E.id}" aria-label="Export ${esc(E.name)} for Hehe.. Run">Run ⤓</button></span>${(()=>{const tg=sortTags(E.tags||[]),pill=`<span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`,lns=[...new Set(ps.flatMap(plateLines))].map(id=>S.lines[id]).filter(Boolean).map(L=>L.name);
     return`${ps.length?`<span class="picons">${ps.slice().sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true})).map(P=>plateIcon(P.vessel,P.status==="ended"&&st!=="done")).join("")}</span>`:""}<span class="l1 e1">${tg.length?tagSet([tg[0]]):""}<b class="${tg.length?"enm":""}">${esc(E.name)}</b>${pill}</span>${tg.length>1?`<span class="l1">${tagSet(tg.slice(1))}</span>`:""}${lns.length?`<span class="elines">${lns.map(esc).join(" · ")}</span>`:""}`})()}
     <span class="sub">${st==="planning"&&E.seedAt?`seed ${sdd(E.seedAt)}`:""}${rem.length?`${st==="planning"&&E.seedAt?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}</span></div>`}
 function renderPlates(){renderPlates0();tlInit($("tab-plates"))}
@@ -1358,13 +1363,14 @@ function renderPlates0(){
     const SR={running:0,planning:1,done:2},running=shown.filter(E2=>plates.some(c=>c.expId===E2.id)).sort((a,b)=>SR[expStatus(a)]-SR[expStatus(b)]||expOrd(a,b));
     if(running.length&&expSeg!=="done"){const lanes=running.map(E2=>{const seen=new Set(),ev=[];plates.filter(c=>c.expId===E2.id).forEach(P=>plateEvents(P).forEach(x=>{const k=x.k+"|"+Math.round(x.d/6e4);if(!seen.has(k)){seen.add(k);ev.push(x)}}));return{label:E2.name,id:E2.id,tags:E2.tags||[],st:expStatus(E2),ev}});
       h+=`<details class="ovw" open><summary>Timeline (${running.length})</summary><div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${timelineCore(lanes)}</div></details>`}
-    const by={running:[],planning:[],done:[]};shown.forEach(E=>by[expStatus(E)].push(E));
-    const nAct=exps.filter(E=>expStatus(E)!=="done").length,nDone=exps.length-nAct;if(expSeg==="done"&&!nDone)expSeg="active";
+    const by={running:[],planning:[],done:[],harv:[]};shown.forEach(E=>{const st=expStatus(E);if(st==="running"&&expPhase(E)==="harv")by.harv.push(E);else by[st].push(E)});
+    const nAct=exps.filter(E=>expStatus(E)!=="done").length+0,nDone=exps.length-nAct;if(expSeg==="done"&&!nDone)expSeg="active";
     h=h.replace(top,top+`<div class="seg" style="max-width:280px;margin-bottom:6px" data-eseg><button data-v="active" aria-pressed="${expSeg==="active"}">Active (${nAct})</button><button data-v="done" aria-pressed="${expSeg==="done"}">Completed (${nDone})</button></div>`);
     if(expSeg==="done"){h+=by.done.length?`<div class="ecards" data-sortkey="exps">${by.done.map(expCard).join("")}</div>`:`<p class="note">No completed experiments${expTag?" with this tag":""}.</p>`;el.innerHTML=h;return}
     if(by.running.length)h+=`<h2>In progress</h2><div class="ecards" data-sortkey="exps">${by.running.map(expCard).join("")}</div>`;
+    if(by.harv.length)h+=`<h2>Waiting for harvest</h2><div class="ecards" data-sortkey="exps">${by.harv.map(expCard).join("")}</div>`;
     if(by.planning.length)h+=`<h2>Planning</h2><div class="ecards" data-sortkey="exps">${by.planning.map(expCard).join("")}</div>`;
-    if(loose.length)h+=`<h2>Other plates</h2><div class="ecards"><button type="button" class="ecard" data-act="openExp" data-exp="_none"><span class="l1"><b>Plates without an experiment</b></span><span class="sub">${loose.length} plate${loose.length>1?"s":""}</span></button></div>`;
+    if(loose.length&&expSeg!=="done")h+=`<h2>Plates</h2><p class="note" style="margin-top:-6px">Not in an experiment. Add them to one to plan actions.</p><div class="crows">${loose.slice().sort((a,b)=>(a.label||a.vessel).localeCompare(b.label||b.vessel,undefined,{numeric:true})).map(c=>cRow(c)).join("")}</div>`;
 
     if(drafts.length)h+=`<h2>Template drafts</h2><div class="ecards">${drafts.map(E=>`<button type="button" class="ecard" data-act="openExp" data-exp="${E.id}"><span class="l1"><b>${esc(E.name)}</b><span class="spill">template</span></span><span class="sub">Not saved yet</span></button>`).join("")}</div>`;
     el.innerHTML=h;return}
@@ -1373,9 +1379,9 @@ function renderPlates0(){
   const srcTxt=E&&(E.srcs||[]).length?E.srcs.map(s=>{const L=S.lines[s.lineId],F=S.cultures[s.flaskId];return`${L?esc(L.name):"?"}${F?` ← ${esc(F.label||F.vessel)} ${pTxt(F)}`:""}`}).join(" · "):"";
   const st=E&&!E.tplOf?expStatus(E):null;
   let h=`<div class="row"><button type="button" class="btn ghost sm" data-act="expList">‹ All experiments</button></div>`;
-  h+=`<div class="block thick">${E?`<div class="bh"><div class="etitle">${tagSet(E.tags)}<h3>${esc(E.name)}${st?` <span class="spill" data-st="${st}">${STL[st]}</span>`:""}</h3></div><span class="sub">${ps.length} plate${ps.length===1?"":"s"}</span></div>
+  h+=`<div class="block thick">${E?`<div class="bh"><div class="etitle">${tagSet(E.tags)}<h3>${esc(E.name)}${st?(()=>{const ph=st==="running"?expPhase(E):"";return` <span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`})():""}</h3></div><span class="row" style="gap:8px"><span class="sub">${ps.length} plate${ps.length===1?"":"s"}</span>${E.tplOf?"":`<select class="menu" data-emenu aria-label="Experiment actions"><option value="">⋯</option><option value="run">Export for Hehe.. Run</option><option value="doc">Export protocol (Word)</option><option value="tpl">Save as template</option><option value="dup">Duplicate</option><option value="del">Delete</option></select>`}</span></div>
       <div class="row"><button class="btn sm solid" data-act="newPlate" data-exp="${E.id}">+ Plate</button><button class="btn sm" data-act="expEdit">Edit</button><button class="btn sm" data-act="expDoc">Protocol ⤓</button><button class="btn sm" data-act="expRun">Hehe.. Run ⤓</button>
-      ${E.tplOf?"":`<select class="menu" data-emenu aria-label="Experiment actions" style="width:auto;padding:5px 8px"><option value="">More ⋯</option><option value="run">Export for Hehe.. Run</option><option value="doc">Export protocol (Word)</option><option value="tpl">Save as template</option><option value="dup">Duplicate</option><option value="del">Delete</option></select>`}</div>
+      </div>
       ${E.tplOf?`<div class="callout"><b>Template draft</b><p class="note" style="margin:4px 0 8px">Changes here only go into the template. Nothing is scheduled. Dates count from the planned seeding.</p><div class="row"><button class="btn sm solid" data-act="tplSave">Save template</button><button class="btn sm ghost" data-act="tplDiscard">Discard</button></div></div>`:""}
       ${E&&!E.tplOf&&ps.some(c=>c.status==="planned")?(()=>{const h=planHost(E.id);if(h){const pl=h.plan,fl=(pl.srcs||[h.id]).map(id=>S.cultures[id]).filter(Boolean);return`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(" + ")}${fl.length>1?" (pooled)":""} → ${sd(pl.at)}</span><div class="row"><button class="btn sm solid" data-act="startPlan" data-id="${h.id}">Start passage</button><button class="btn sm ghost" data-act="planP" data-id="${h.id}">Edit plan</button></div></div>`}
         const fl=(E.srcs||[]).map(s=>S.cultures[s.flaskId]).filter(F=>F&&F.status==="active");return fl.length?`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(", ")} → seed ${sd(E.seedAt)}</span><div class="row"><button class="btn sm solid" data-act="expToSeed">Open in Seed</button><button class="btn sm ghost" data-act="planExp" data-id="${fl[0].id}" data-exp="${E.id}">Edit plan</button></div></div>`:`<p class="note">Tip: pick the flask you'll passage under Edit → Cells used, or plan it from a flask's ⋯ → Plan passage.</p>`})():""}
@@ -1417,7 +1423,7 @@ $("tab-plates").addEventListener("change",e=>{const t=e.target;
   const P=S.cultures[openPlate];if(!P)return;
   if(t.dataset.dens!==undefined){const P2=clone(P);P2.layout.dens[t.dataset.dens]=(num(t.value)*1e3)||0;if(t.dataset.dens===P2.lineId)P2.seeded=(num(t.value)*1e3)||0;save("cultures",P2);return}
   if(t.dataset.loadset!==undefined&&t.value){const st=(S.settings.condSets||[]).find(x=>x.id===t.value);t.value="";t.blur();if(!st)return;const P2=clone(P),have=new Set(P2.layout.groups.map(g=>g.name));let n=0;st.items.forEach(nm=>{if(!have.has(nm)){P2.layout.groups.push({id:rid(),name:nm});n++}});save("cultures",P2);toast(n?`Added ${n} condition${n>1?"s":""}. Select wells, then tap one to assign.`:"They're all on this plate already.");return}
-  if(t.dataset.addline!==undefined&&t.value){const P2=clone(P),ln=t.value;P2.layout.dens[ln]=defaultSeed(S.lines[ln],P.vessel);selW.forEach(w=>P2.layout.lines[w]=ln);selW.clear();P2.wells=usedWells(P2).length;save("cultures",P2);return}
+  if(t.dataset.addline!==undefined&&t.value){const P2=clone(P),ln=t.value;syncSrc(P2,ln);P2.layout.dens[ln]=defaultSeed(S.lines[ln],P.vessel);selW.forEach(w=>P2.layout.lines[w]=ln);selW.clear();P2.wells=usedWells(P2).length;save("cultures",P2);return}
   if(t.dataset.tmenu!==undefined){const a=t.value;t.value="";const sc=scopeOf(P),g=treatGroups(sc).find(x=>x.T.id===t.dataset.tmenu);if(!g)return;
     if(a==="edit")treatForm(sc,g.T,g.plates.map(p=>p.id));
     else if(a==="dup"){const c=clone(g.T);c.id=rid();delete c.grp;c.name=(c.name+" (copy)").slice(0,50);treatForm(sc,c,g.plates.map(p=>p.id))}
@@ -1435,7 +1441,7 @@ $("tab-plates").addEventListener("click",e=>{const t=e.target;{const sb=t.closes
   const C=S.cultures[openPlate];if(!C||!C.layout)return;
   const pal=t.closest("[data-pal]");if(pal&&pmode==="mark"){const key=pal.dataset.pal,C2=clone(C),M=(C2.layout.marks||[]).find(m=>m.id===key);if(!M)return;
     if(selW.size){M.wells=[...new Set(M.wells.concat([...selW]))];selW.clear();save("cultures",C2)}else{M.wells.forEach(w=>selW.add(w));renderPlates()}return}
-  if(pal){const key=pal.dataset.pal,C2=clone(C),tgt=pmode==="cond"?C2.layout.wells:C2.layout.lines;
+  if(pal){const key=pal.dataset.pal,C2=clone(C),tgt=pmode==="cond"?C2.layout.wells:C2.layout.lines;if(pmode==="line"&&selW.size&&key){if(C2.layout.dens[key]==null)C2.layout.dens[key]=defaultSeed(S.lines[key],C2.vessel);syncSrc(C2,key)}
     if(selW.size){selW.forEach(w=>tgt[w]=key);selW.clear();C2.wells=usedWells(C2).length;save("cultures",C2)}
     else{Object.keys(tgt).forEach(w=>{if(tgt[w]===key)selW.add(w)});renderPlates()}return}
   if(!editing)return;
@@ -1566,7 +1572,7 @@ function tplForm(x){const names=[...new Set(tTypes(x).flatMap(t=>[...(t.treated|
 function harvestForm(P,H0){const Hv=H0?clone(H0):{id:rid(),from:(P.treatments||[]).length?P.treatments.slice().sort((a,b)=>a.at-b.at).pop().id:"seed",after:48,unit:"h",remind:true,note:""};
   openSheet(H0?"Edit harvest":"Add harvest",`<div class="grid">
     <label class="full">Harvest after<select name="from" class="txt"><option value="seed"${Hv.from==="seed"?" selected":""}>Seeding (${sd(P.seededAt)})</option>${(P.treatments||[]).map(T=>`<option value="${T.id}"${Hv.from===T.id?" selected":""}>${esc(T.name)} (${sd(T.at)})</option>`).join("")}</select></label>
-    ${SF("How long after","after",Hv.after)}<label>Unit<select name="unit" class="txt"><option value="h"${Hv.unit!=="d"?" selected":""}>hours</option><option value="d"${Hv.unit==="d"?" selected":""}>days</option></select></label>
+    ${SF("How long after","after",Hv.after)}<label>Unit<select name="unit" class="txt"><option value="min"${Hv.unit==="min"?" selected":""}>minutes</option><option value="h"${Hv.unit!=="d"&&Hv.unit!=="min"?" selected":""}>hours</option><option value="d"${Hv.unit==="d"?" selected":""}>days</option></select></label>
     ${SF("Note (optional)","note",Hv.note||"","text","","full")}
     <label class="check full"><input type="checkbox" name="remind"${Hv.remind?" checked":""}> Remind me</label></div><p class="note" data-hat></p>`,
   fd=>{const P2=clone(P);Object.assign(Hv,{from:fd.from,after:num(fd.after)||0,unit:fd.unit,note:fd.note.trim(),remind:fd.remind});
@@ -1588,7 +1594,7 @@ function events(end){const now=Date.now(),items=[],tgt=S.settings.targetConf||90
     if(C.status==="active"&&C.plan&&C.plan.at)items.push({d:C.plan.at,kind:"Passage",t:C.plan.note||"",c:C,plan:C.plan,type:"pass",time:true});
   });
   Object.values(S.exps).forEach(E=>{if(E.tplOf||!E.seedAt||!Object.values(S.cultures).some(c=>c.expId===E.id&&c.status==="planned"))return;
-    if(planHost(E.id))return;(E.srcs||[]).forEach(s=>{const F=S.cultures[s.flaskId];if(!F||F.status!=="active"||(F.plan&&sod(F.plan.at)===sod(E.seedAt)))return;items.push({d:E.seedAt,kind:"Passage",c:F,E,type:"pass",time:true})})});
+    if(planHost(E.id))return;const pool=(E.srcs||[]).map(s=>S.cultures[s.flaskId]).filter(F=>F&&F.status==="active"&&!(F.plan&&sod(F.plan.at)===sod(E.seedAt)));if(pool.length)items.push({d:E.seedAt,kind:"Passage",c:pool[0],E,pool:pool.map(F=>F.id),type:"pass",time:true})});
   const cov=new Set();items.forEach(i=>{if(i.type!=="pass")return;if(i.E)cov.add(i.E.id+"|"+sod(i.d));(i.plan&&i.plan.exps||[]).forEach(id=>cov.add(id+"|"+sod(i.d)))});
   return items.filter(i=>i.d<end&&!(i.type==="seed"&&i.c.expId&&cov.has(i.c.expId+"|"+sod(i.d)))).sort((a,b)=>a.d-b.d)}
 function doneToday(){const s=sod(Date.now()),out=[],m={};Object.values(S.cultures).forEach(C=>(C.log||[]).forEach((l,li)=>{if(!(l.d>=s&&(l.k==="media"||l.k==="rem")))return;
@@ -1597,7 +1603,9 @@ function doneToday(){const s=sod(Date.now()),out=[],m={};Object.values(S.culture
 function mediaNeed(days){const end=Date.now()+days*DAY,by={};
   events(end).filter(i=>i.type==="media"&&i.d>=sod(Date.now())).forEach(i=>{const C=i.c,L=S.lines[C.lineId],key=(L&&L.media)||"Medium (type not set)";by[key]=(by[key]||0)+(C.mediumMl||0)*wellsUsed(C)});return by}
 function shortName(C){return C.label||C.vessel}
-const pTxt=C=>isFinite(parseFloat(C&&C.passage))?`P${C.passage}`:"P–";
+const pTxt=C=>isFinite(parseFloat(C&&C.passage))?`P${C.passage}${C.sfx?"-"+C.sfx:""}`:"P–";
+let FIXING=false;function fixFlaskNames(){if(FIXING)return;FIXING=true;try{const g={};Object.values(S.cultures).filter(c=>!c.layout&&(c.status==="active"||c.status==="planned")&&isFinite(parseFloat(c.passage))&&(!c.label||c.label===c.vessel||c.sfx)).forEach(c=>{const k=c.lineId+"|"+c.passage+"|"+(c.vessel||"");(g[k]=g[k]||[]).push(c)});
+  Object.values(g).forEach(cs=>{if(cs.length<2)return;cs.sort((a,b)=>(a.seededAt||0)-(b.seededAt||0)||String(a.id).localeCompare(String(b.id)));let n=Math.max(0,...cs.map(c=>num(c.sfx)||0));const used=new Set(cs.map(c=>c.sfx).filter(Boolean));cs.forEach(c=>{if(c.sfx&&!used.has(c.sfx+"x"))return;let k=1;while(used.has(k))k++;used.add(k);const c2=clone(c);c2.sfx=k;save("cultures",c2)})})}finally{FIXING=false}}
 function ownerName(C){const E=C.expId&&S.exps[C.expId],L=S.lines[C.lineId],lab=C.label&&C.label!==C.vessel&&C.label!==C.vessel+" plate"?C.label:"";
   if(C.layout&&E)return`${E.name}${lab?" | "+lab:""}`;return C.layout?`${L?L.name:"No line"}${lab?" · "+lab:""}`:`${L?L.name:"No line"} · ${pTxt(C)}`}
 let EVS=[];
@@ -1636,7 +1644,7 @@ function evSheet(i){const C=i.c,tick=(i.type==="media"||i.type==="rem")&&!i.proj
       body=`<p class="note">${sc.length>1?`${sc.length} plates: ${sc.map(p=>esc(p.label||p.vessel)).join(", ")} · `:""}Applies to ${tr.map(c=>esc(c.name)).join(", ")||"—"} · ${tVolTxt(T)||"—"}</p>${layout(sc[0])}
       ${!isTreat(T)?(T.note?`<p class="pre">${esc(T.note)}</p>`:""):T.adv?`<h2>What to make${sc.length>1?" · all plates":""}</h2>${recipeHTML(conds,T)}`:`<p class="note">Turn on "Advanced" in the action to get a reagent recipe here.</p>`}`}else body=`<p class="note">${esc(i.t||"")}</p>`}
   else if(i.type==="rem"&&i.kind==="Harvest"){const Hv=(C.harvests||[])[0],T=Hv&&(C.treatments||[]).find(t=>t.id===Hv.from);
-    body=`<p class="note">${Hv?`${num(Hv.after)} ${Hv.unit==="d"?"days":"h"} after ${Hv.from==="seed"?"seeding":T?esc(T.name):"a treatment"}`:""}${Hv&&Hv.note?` · ${esc(Hv.note)}`:""}</p>${layout(C)}`}
+    body=`<p class="note">${Hv?`${num(Hv.after)} ${Hv.unit==="d"?"days":Hv.unit==="min"?"min":"h"} after ${Hv.from==="seed"?"seeding":T?esc(T.name):"a treatment"}`:""}${Hv&&Hv.note?` · ${esc(Hv.note)}`:""}</p>${layout(C)}`}
   else if(i.type==="seed"&&i.sgroup&&i.sgroup.length>1){body=`<div class="list">${i.sgroup.map(c=>`<div class="li">${ICON.plate}<span class="what"><b>${esc(c.label||c.vessel)}</b><small>${esc(c.vessel)} · ${wellsUsed(c)} wells</small></span></div>`).join("")}</div>${layout(C)}<div class="row"><button type="button" class="btn" data-sheetgo="passexp" data-id="${C.expId}">Plan all in Seed</button><button type="button" class="btn ghost" data-sheetgo="planexp" data-id="${C.expId}">Plan passage</button></div>`}
   else if(i.type==="seed")body=`${layout(C)}<div class="row"><button type="button" class="btn" data-sheetgo="seed" data-id="${C.id}">Plan this in Seed</button>${C.expId?`<button type="button" class="btn ghost" data-sheetgo="planexp" data-id="${C.expId}">Plan passage</button>`:""}</div>`;
   else if(i.type==="conf"){const cs=i.cgroup||[C],tgt=S.settings.targetConf||90;body=`<p class="note">Estimated from each line's doubling time. These should be around ${tgt}% by ${sd(i.d)}.</p>`+byLineHTML(cs,c=>{const p=confNow(c);return`<div class="li">${vIc(c)}<button type="button" class="what linkrow" data-cinfo="${c.id}"><b>${c.expId&&S.exps[c.expId]?tagOne(S.exps[c.expId].tags):""}${esc(cNm(c))}</b><small>~${isFinite(p)?Math.round(p):"?"}% now · details</small></button><button type="button" class="btn sm" data-sheetgo="passage" data-id="${c.id}">Passage</button></div>`})}
@@ -1653,11 +1661,11 @@ function evSheet(i){const C=i.c,tick=(i.type==="media"||i.type==="rem")&&!i.proj
   $("sheetForm").onclick=e=>{const ci=e.target.closest("[data-cinfo]");if(ci){cultureInfo(S.cultures[ci.dataset.cinfo],()=>evSheet(i));return}const g=e.target.closest("[data-sheetgo]");if(!g)return;closeSheet();const k=g.dataset.sheetgo;
     if(k==="openexp"){openExp=g.dataset.id;ls.set("openExp",openExp);expView="detail";ls.set("expView","detail");openPlate=null;editing=false;renderPlates();showTab("plates");return}
     if(k==="passexp"){const E2=S.exps[g.dataset.id];if(E2)expToSeed(E2);return}if(k==="passplan"){startPlan(S.cultures[g.dataset.id]);return}if(k==="planedit"){const ex=g.dataset.exp;planForm(S.cultures[g.dataset.id],ex&&S.exps[ex]?{at:S.exps[ex].seedAt,exps:[ex],srcs:[g.dataset.id]}:null);return}
-    if(k==="planexp"){const E2=S.exps[g.dataset.id];if(!E2)return;const h=planHost(E2.id);if(h)return planForm(h);const F=(E2.srcs||[]).map(x=>S.cultures[x.flaskId]).find(F=>F&&F.status==="active")||flasksActive().find(F=>(E2.srcs||[]).some(x=>x.lineId===F.lineId))||flasksActive()[0];if(!F){toast("No active flasks to passage.");return}planForm(F,{at:E2.seedAt,exps:[E2.id],srcs:[F.id]});return}if(k==="planP"){doAct("planP",g.dataset.id);return}
+    if(k==="planexp"){const E2=S.exps[g.dataset.id];if(!E2)return;const h=planHost(E2.id);if(h)return planForm(h);const F=(E2.srcs||[]).map(x=>S.cultures[x.flaskId]).find(F=>F&&F.status==="active")||flasksActive().find(F=>(E2.srcs||[]).some(x=>x.lineId===F.lineId))||flasksActive()[0];if(!F){toast("No active flasks to passage.");return}planForm(F,{at:E2.seedAt,exps:[E2.id],srcs:[...new Set([F.id].concat((E2.srcs||[]).map(x=>x.flaskId).filter(id=>S.cultures[id]&&S.cultures[id].status==="active")))]});return}if(k==="planP"){doAct("planP",g.dataset.id);return}
     if(k==="passage")doAct("passage",g.dataset.id);else if(k==="exp")doAct("openPlate",g.dataset.id);else{openPlate=g.dataset.id;doAct("plateToSeedId",g.dataset.id)}}}
 function tgtOf(T,cname,i,treated){const o=(T.over||{})[cname];if(o&&o[i]!==undefined&&o[i]!==null)return o[i];return treated?T.reagents[i].target:""}
 function titleOf(i){if(i.type==="rem"&&i.kind==="Treatment"&&i.group&&new Set(i.group.map(g=>g.rid)).size>1)return`${new Set(i.group.map(g=>g.rid)).size} actions`;if(i.type==="rem")return i.kind==="Treatment"?(i.t||"Action"):i.kind==="Harvest"?"Harvest":(i.t||i.kind);return i.type==="media"?"Media":i.type==="seed"?(i.sgroup&&i.sgroup.length>1?"Seed plates":"Seed plate"):i.type==="conf"?"Confluent prediction":i.kind}
-function ownerOf(i){if(i.group&&new Set(i.group.map(g=>g.rid)).size>1){const E=S.exps[i.c.expId],nm=[...new Set(i.group.map(g=>{const r=(g.c.reminders||[]).find(x=>x.id===g.rid);return r?r.t:""}).filter(Boolean))];return(E?E.name+" · ":"")+nm.join(", ")}if(i.type==="pass"){const xs=i.plan?(i.plan.exps||[]).map(id=>S.exps[id]&&S.exps[id].name).filter(Boolean):i.E?[i.E.name]:[],n=i.plan?(i.plan.srcs||[]).length:1;return ownerName(i.c)+(n>1?` +${n-1} pooled`:"")+(xs.length?" → "+xs.join(", "):"")}if(i.sgroup){const E=S.exps[i.c.expId];return(E?E.name:"")+(i.sgroup.length>1?` · ${i.sgroup.length} plates`:"")}const g=i.mgroup||i.cgroup;if(g){const m={};g.forEach(c=>{const L=S.lines[c.lineId],n=L?L.name:"No line";m[n]=(m[n]||0)+1});return Object.entries(m).map(([n,k])=>k>1?`${n} ×${k}`:n).join(", ")}
+function ownerOf(i){if(i.group&&new Set(i.group.map(g=>g.rid)).size>1){const E=S.exps[i.c.expId],nm=[...new Set(i.group.map(g=>{const r=(g.c.reminders||[]).find(x=>x.id===g.rid);return r?r.t:""}).filter(Boolean))];return(E?E.name+" · ":"")+nm.join(", ")}if(i.type==="pass"){const xs=i.plan?(i.plan.exps||[]).map(id=>S.exps[id]&&S.exps[id].name).filter(Boolean):i.E?[i.E.name]:[],ids=i.plan?(i.plan.srcs||[i.c.id]):i.pool||[i.c.id],fl=ids.map(id=>S.cultures[id]).filter(Boolean),byL={};fl.forEach(F=>{(byL[F.lineId]=byL[F.lineId]||[]).push(F)});const parts=Object.values(byL).map(a=>ownerName(a[0])+(a.length>1?` +${a.length-1} pooled`:""));return(parts.join(" + ")||ownerName(i.c))+(xs.length?" → "+xs.join(", "):"")}if(i.sgroup){const E=S.exps[i.c.expId];return(E?E.name:"")+(i.sgroup.length>1?` · ${i.sgroup.length} plates`:"")}const g=i.mgroup||i.cgroup;if(g){const m={};g.forEach(c=>{const L=S.lines[c.lineId],n=L?L.name:"No line";m[n]=(m[n]||0)+1});return Object.entries(m).map(([n,k])=>k>1?`${n} ×${k}`:n).join(", ")}
   return i.group&&i.c.expId&&S.exps[i.c.expId]?S.exps[i.c.expId].name+(i.group.length>1?` · ${i.group.length} plates`:""):ownerName(i.c)}
 function mergeTreat(list){const out=[],m={};
   list.forEach(i=>{const E=i.c.expId&&S.exps[i.c.expId];
@@ -1785,7 +1793,7 @@ function renderSettings(){{let mig=false;(S.settings.tplGroups||[]).forEach(g=>{
   ${(s.condPresets||[]).length?`<div class="list" data-sortkey="set:condPresets">${s.condPresets.map((c,i,A)=>`<div class="li" data-sid="${i}"><span class="grip" data-grip aria-label="Drag to reorder">⠿</span><span class="what"><span class="ctag" data-sh="${(i%6)+1}">${esc(c)}</span></span><button type="button" class="btn ghost sm" data-rmpreset="${i}" aria-label="Remove ${esc(c)}">×</button></div>`).join("")}</div>`:`<p class="note">No saved conditions yet.</p>`}
   <div class="row"><input type="text" id="presetNew" placeholder="e.g. Vehicle control" style="flex:1"><button class="btn sm" data-sact="addPreset">Add</button></div>
   <h2>Experiment templates</h2>
-  ${et.length?`<div class="list" data-sortkey="set:expTemplates">${et.map((x,i)=>`<div class="li" data-sid="${i}"><span class="grip" data-grip aria-label="Drag to reorder">⠿</span><span class="what">${esc(x.name)}<small>${x.plates.length} plate${x.plates.length>1?"s":""} · ${x.plates.map(p=>esc(p.label||p.vessel)).join(", ")}${(x.tags||[]).length?" · "+x.tags.map(esc).join(", "):""}</small></span><button class="btn sm" data-edetpl="${x.id}">Edit</button><button class="btn ghost sm" data-rmetpl="${x.id}">Delete</button></div>`).join("")}</div>`:`<p class="note">Make one here, or use More ⋯ → Save as template on an experiment.</p>`}
+  ${et.length?`<div class="list" data-sortkey="set:expTemplates">${et.map((x,i)=>`<div class="li" data-sid="${i}"><span class="grip" data-grip aria-label="Drag to reorder">⠿</span><span class="what">${esc(x.name)}<small>${x.plates.length} plate${x.plates.length>1?"s":""} · ${x.plates.map(p=>esc(p.label||p.vessel)).join(", ")}${(x.tags||[]).length?" · "+x.tags.map(esc).join(", "):""}</small></span><button class="btn sm" data-edetpl="${x.id}">Edit</button><button class="btn ghost sm" data-rmetpl="${x.id}">Delete</button></div>`).join("")}</div>`:`<p class="note">Make one here, or use ⋯ → Save as template on an experiment.</p>`}
   <div><button class="btn sm" data-newetpl>+ New experiment template</button></div>
   <h2>Backup and devices</h2>
   <p class="note">${DB?"Your data is saved to your Claude account.":"Your data is saved on this device only."} Last backup on this device: <b>${bkAgo()===null?"never":bkAgo()===0?"today":bkAgo()+" day"+(bkAgo()>1?"s":"")+" ago"}</b>.</p>
@@ -2414,16 +2422,17 @@ function movePlan(expId,at){Object.values(S.cultures).filter(c=>c.status==="acti
   else{c2.plan.at=at;save("cultures",c2);toast(`Passage moved to ${sd(at)}, ${st(at)} ✦`)}})}
 function planHost(expId){return Object.values(S.cultures).find(c=>c.status==="active"&&c.plan&&(c.plan.exps||[]).includes(expId))}
 function startPlan(C){if(!C)return;const pl=C.plan||{};const srcs=(pl.srcs&&pl.srcs.length?pl.srcs:[C.id]).filter(id=>S.cultures[id]&&S.cultures[id].status==="active");if(!srcs.length)return;
-  plan.mode="adv";let g=plan.adv.find(x=>!x.done&&(x.srcs||[]).some(id=>srcs.includes(id)));
-  if(!g){if(plan.adv.length>=5){toast("Seed already has 5 sources. Remove one first.");return}g=newGroup(srcs);plan.adv.push(g)}
-  (pl.exps||[]).forEach(id=>{if(S.exps[id]&&!g.items.some(i=>i.t==="exp"&&i.expId===id))g.items.push({t:"exp",expId:id,extra:0})});
-  if(!g.items.some(i=>i.t==="flask"))(pl.flasks||[]).forEach(f=>{const it=newItem("flask",g);Object.assign(it,{fmt:f.fmt,n:num(f.n)||1,per:num(f.per)||it.per,v:V(f.fmt).v});g.items.push(it)});
+  plan.mode="adv";const byL={};srcs.forEach(id=>{const k=S.cultures[id].lineId||"";(byL[k]=byL[k]||[]).push(id)});const hostL=S.cultures[srcs[0]].lineId||"";let first=null;
+  for(const[ln,ids]of Object.entries(byL)){let g=plan.adv.find(x=>!x.done&&(x.srcs||[]).some(id=>ids.includes(id)));
+    if(!g){if(plan.adv.length>=5){toast("Seed already has 5 sources. Remove one first.");break}g=newGroup(ids);plan.adv.push(g)}
+    (pl.exps||[]).forEach(id=>{if(S.exps[id]&&!g.items.some(i=>i.t==="exp"&&i.expId===id))g.items.push({t:"exp",expId:id,extra:0})});
+    if(ln===hostL&&!g.items.some(i=>i.t==="flask"))(pl.flasks||[]).forEach(f=>{const it=newItem("flask",g);Object.assign(it,{fmt:f.fmt,n:num(f.n)||1,per:num(f.per)||it.per,v:V(f.fmt).v});g.items.push(it)});if(!first)first=g}
   sview="";ls.set("sview","");savePlan();renderSeed();showTab("seed")}
 function planForm(C,preset){if(!C)return;const L=S.lines[C.lineId],pl=Object.assign({at:tomorrow10(),note:"",srcs:[C.id],exps:[],flasks:[]},clone(C.plan||{}),preset||{});if(!pl.srcs||!pl.srcs.length)pl.srcs=[C.id];pl.exps=pl.exps||[];pl.flasks=pl.flasks||[];
-  const fl=flasksActive().filter(f=>f.lineId===C.lineId);
+  const fl=flasksActive().slice().sort((a,b)=>(a.lineId===C.lineId?0:1)-(b.lineId===C.lineId?0:1)||srcName(a).localeCompare(srcName(b)));
   const exs=Object.values(S.exps).filter(E=>!E.tplOf&&Object.values(S.cultures).some(c=>c.expId===E.id&&c.status==="planned"));
-  const draw=()=>{openSheet(`Passage plan${L?" · "+L.name:""}`,`${SF("When","at",isoDT(pl.at),"datetime-local","","full")}
-    <div><span class="sub">Flasks to passage · tick more than one to pool them</span><div class="list">${fl.map(f=>{const p=confNow(f);return`<label class="li check"><input type="checkbox" data-psrc="${f.id}"${pl.srcs.includes(f.id)?" checked":""}><span class="what">${esc(srcName(f))}${isFinite(p)?`<small>~${Math.round(p)}% now</small>`:""}</span></label>`}).join("")}</div></div>
+  const draw=()=>{openSheet(`Passage plan`,`${SF("When","at",isoDT(pl.at),"datetime-local","","full")}
+    <div><span class="sub">Flasks to passage · same cell line is pooled, other lines are counted separately</span><div class="list">${fl.map(f=>{const p=confNow(f);return`<label class="li check"><input type="checkbox" data-psrc="${f.id}"${pl.srcs.includes(f.id)?" checked":""}><span class="what">${esc(srcName(f))}${isFinite(p)?`<small>~${Math.round(p)}% now</small>`:""}</span></label>`}).join("")}</div></div>
     <div><span class="sub">Seed plates for</span>${exs.length?`<div class="list">${exs.map(E=>{const n=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.status==="planned").length;return`<label class="li check"><input type="checkbox" data-pexp="${E.id}"${pl.exps.includes(E.id)?" checked":""}><span class="what"><span>${tagOne(E.tags)}${esc(E.name)}</span><small>${n} plate${n>1?"s":""} · planned ${sd(E.seedAt)}</small></span></label>`}).join("")}</div>`:`<p class="note">No experiments with planned plates yet.</p>`}</div>
     <div><span class="sub">New flasks</span>${pl.flasks.map((f,k)=>`<div class="row" style="flex-wrap:nowrap;gap:6px"><select class="txt" data-pf="${k}" data-pk="fmt" style="flex:1;min-width:0">${opts(vlist("flask",f.fmt),f.fmt)}</select><input type="number" min="1" data-pf="${k}" data-pk="n" value="${esc(f.n)}" style="width:52px" aria-label="How many"><div class="unit" style="width:118px"><input type="number" min="0" step="any" data-pf="${k}" data-pk="per" value="${esc(shw(f.per,1e6))}" aria-label="Cells per flask"><em>×10⁶</em></div><button type="button" class="btn ghost sm" data-pfrm="${k}" aria-label="Remove">×</button></div>`).join("")}<div style="margin-top:6px"><button type="button" class="btn sm" data-pfadd>+ Flask</button></div></div>
     <label class="full">Note (optional)<input type="text" name="note" data-long maxlength="120" value="${esc(pl.note||"")}" placeholder="e.g. split 1:3"></label>
@@ -2708,7 +2717,7 @@ function heheDivide(m){if(m.dataset.div)return;m.dataset.div=1;const inner=masco
   m.querySelector(".dvz").animate([{offset:0,transform:"translate(0px,0px) scale(1)"},{offset:.58,transform:"translate(0px,0px) scale(1)"},{offset:.62,transform:"translate(0px,0px) scale(1.04)",easing:"ease-in"},{offset:.7,transform:"translate(0px,0px) scale(1)",easing:"cubic-bezier(.5,0,.2,1)"},{offset:.86,transform:"translate(-20.8px,-23.6px) scale(2.4)"},{offset:1,transform:"translate(-20.8px,-23.6px) scale(2.4)"}],{duration:D,fill:"forwards"});
   setTimeout(()=>{m.innerHTML=mascot(sz,"happy");delete m.dataset.div;m.classList.remove("bounce");void m.offsetWidth;m.classList.add("bounce")},D+30)}
 
-function renderData(){
+let FIXED0=false;function renderData(){if(S.ready&&!FIXED0){FIXED0=true;setTimeout(fixFlaskNames,800)}
   const ae=document.activeElement,typing=ae&&ae.matches&&ae.matches("input,select,textarea")&&!ae.matches("select.menu");
   renderToday();renderCultures();
   if(!(typing&&$("tab-plates").contains(ae)))renderPlates();
