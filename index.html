@@ -474,16 +474,17 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 .ecard[data-ph="act"]{border-left-color:#1fa5a9!important}.spill[data-ph="act"]{background:#1fa5a9!important;color:#fff!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .spill[data-ph="act"]{background:#5fd0d3!important;color:#0d2a2b!important}:root:not([data-theme="light"]) .ecard[data-ph="act"]{border-left-color:#5fd0d3!important}}
 .tlv{display:flex;flex-direction:column;gap:6px}[data-actv]{padding:5px 10px!important}
-.tlday{display:flex;align-items:baseline;gap:10px;font:700 14px var(--mono);letter-spacing:.04em;color:var(--hi);border-bottom:2px solid color-mix(in srgb,var(--hi) 35%,transparent);padding:10px 0 4px;margin-top:4px}
+.tlday{display:flex;align-items:baseline;gap:10px;font:600 12px var(--mono);letter-spacing:.05em;color:var(--hi);border-bottom:2px solid color-mix(in srgb,var(--hi) 35%,transparent);padding:10px 0 4px;margin-top:4px}
 .tlday span{font:600 11px var(--sans);color:#fff;background:var(--pk);padding:1px 8px;border-radius:9px;letter-spacing:0}.tlday.today{color:color-mix(in srgb,#c2255c 80%,var(--fg));border-color:var(--pk)}.tlday.past{opacity:.6}
-.tlrow{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:start}.tltime{font:700 14px var(--mono);text-align:right;padding-top:8px}
-.tlchip{display:inline-block;font:600 13px var(--sans);padding:5px 12px;border-radius:999px;margin-top:3px}.tlchip.seed{background:color-mix(in srgb,var(--yl) 30%,var(--bg));color:color-mix(in srgb,#9a6a00 85%,var(--fg))}.tlchip.harv{background:color-mix(in srgb,var(--c-harv) 20%,var(--bg));color:var(--c-harv)}.tlchip.done{opacity:.55}
+.tlrow{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:start}.tltime{font:500 12.5px var(--mono);text-align:right;padding-top:9px}
+.tlchip{display:inline-block;font:500 12.5px var(--sans);padding:4px 11px;border-radius:999px;margin-top:3px}.tlchip.seed{background:color-mix(in srgb,var(--yl) 30%,var(--bg));color:color-mix(in srgb,#9a6a00 85%,var(--fg))}.tlchip.harv{background:color-mix(in srgb,var(--c-harv) 20%,var(--bg));color:var(--c-harv)}.tlchip.done{opacity:.55}
 .tlcard{border:1.5px solid var(--line-strong);border-radius:12px;background:var(--bg);overflow:hidden}.tlcard.next{border-color:#1fa5a9;box-shadow:0 0 0 2px color-mix(in srgb,#1fa5a9 25%,transparent)}
-.tlh{display:flex;align-items:center;gap:8px;padding:8px 10px}.tlh input{width:22px;height:22px;flex:none}.tlx{background:none;border:0;color:var(--muted);font-size:14px;cursor:pointer;padding:0 2px;transition:transform .15s}.tlcard.open .tlx{transform:rotate(180deg)}
-.tln2{font:700 14px var(--mono);color:#1fa5a9}.tlnm{font-weight:600;font-size:15px;flex:1;min-width:0}.tlmeta{font:12px var(--mono);color:var(--muted);text-align:right;max-width:40%}.tlh select.menu{flex:none}
+.tlh{display:flex;align-items:center;gap:8px;padding:7px 10px}.tlh input{width:20px;height:20px;flex:none}.tlx{background:none;border:0;color:var(--muted);cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;transition:transform .15s;line-height:0}.tlcard.open .tlx{transform:rotate(180deg)}
+.tln2{font:600 13px var(--mono);color:var(--hi)}.tlnm{font-weight:400;font-size:14px;flex:1;min-width:0}.tlmeta{font:12px var(--mono);color:var(--muted);text-align:right;max-width:40%}.tlh select.menu{flex:none}
 .tld{border-top:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .tlcard.done{opacity:.6}.tlcard.done .tlnm{text-decoration:line-through}
-.tlnow{position:relative;height:18px;margin:2px 0}.tlnow::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--pk)}.tlnow span{position:relative;margin-left:56px;background:var(--pk);color:#fff;font:600 11px var(--sans);padding:1px 8px;border-radius:9px}
+.tlnow{position:relative;height:18px;margin:2px 0}.tlnow::before{content:"";position:absolute;left:56px;right:0;top:50%;border-top:2px solid var(--pk)}.tlnow span{position:relative;margin-left:56px;background:var(--pk);color:#fff;font:600 11px var(--sans);padding:1px 8px;border-radius:9px}
+.tlgh{display:flex;align-items:center;gap:8px;margin:4px 0 -2px}.tlgtag{font:500 12px var(--sans);color:var(--hi);background:var(--tint);padding:2px 10px;border-radius:999px}.tlcard.ing{border-left:4px solid var(--hi)}
 @media (max-width:420px){.tlmeta{display:none}}
 @media (prefers-reduced-motion:reduce){.rain{animation:none}}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
@@ -566,7 +567,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.4.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.4.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1281,7 +1282,7 @@ function actTimeline(E,plates){const all=plates,now=Date.now(),t0=sod(now),ent=[
   const gs=treatGroups(all);gs.forEach(g=>ent.push({at:g.T.at||0,k:"act",g}));
   const hv={};all.forEach(P=>(P.harvests||[]).forEach(Hv=>{const at=harvestAt(P,Hv);if(at)(hv[at]=hv[at]||[]).push(P)}));Object.entries(hv).forEach(([at,ps])=>ent.push({at:+at,k:"harv",ps}));
   ent.sort((a,b)=>(a.at||9e15)-(b.at||9e15)||({seed:0,act:1,harv:2}[a.k]-{seed:0,act:1,harv:2}[b.k]));
-  let n=0,lastDay=null,nowDone=false,h="";const nm=ps=>ps.length===all.length&&all.length>1?"all plates":ps.map(p=>esc(p.label||p.vessel)).join(", ");
+  let n=0,lastDay=null,nowDone=false,h="";const gSeen=new Set(),gCount={};gs.forEach(g=>{if(g.T.grp)gCount[g.T.grp.id]=(gCount[g.T.grp.id]||0)+1});const nm=ps=>ps.length===all.length&&all.length>1?"all plates":ps.map(p=>esc(p.label||p.vessel)).join(", ");
   const nextAct=ent.find(e=>e.k==="act"&&!tDone(e.g.T,e.g.plates));
   ent.forEach(e=>{const d=e.at?sod(e.at):null;
     if(!nowDone&&e.at&&e.at>now&&lastDay!==null){if(d!==t0&&lastDay!==t0){h+=`<div class="tlday today"><b>${dayLbl(now)}</b><span>Today</span></div>`;lastDay=t0}h+=`<div class="tlnow"><span>Now ${hm24(now)}</span></div>`;nowDone=true}
@@ -1289,8 +1290,8 @@ function actTimeline(E,plates){const all=plates,now=Date.now(),t0=sod(now),ent=[
     const tm=`<span class="tltime">${e.at?hm24(e.at):"—"}</span>`;
     if(e.k==="seed")h+=`<div class="tlrow">${tm}<div class="tlbody"><span class="tlchip seed">◆ Seed ${esc(nm(e.ps))}</span></div></div>`;
     else if(e.k==="harv")h+=`<div class="tlrow">${tm}<div class="tlbody"><span class="tlchip harv${e.ps.every(p=>p.status==="ended")?" done":""}">◆ Harvest ${esc(nm(e.ps))}${e.ps.every(p=>p.status==="ended")?" ✓":""}</span></div></div>`;
-    else{const {T,plates:ps}=e.g,dn=tDone(T,ps),nx=nextAct&&nextAct.g.T.id===T.id;n++;
-      h+=`<div class="tlrow">${tm}<div class="tlbody"><div class="tlcard${dn?" done":""}${nx?" next":""}"><div class="tlh"><input type="checkbox" data-tdone="${T.id}"${dn?" checked":""} aria-label="Mark ${esc(T.name)} done"><button type="button" class="tlx" data-tlx aria-label="Show details">⌄</button><b class="tln2">${n}</b><span class="tlnm">${esc(T.name)}</span><span class="tlmeta">${tVolTxt(T)||esc(T.kind||"")}</span>
+    else{const {T,plates:ps}=e.g,dn=tDone(T,ps),nx=nextAct&&nextAct.g.T.id===T.id;n++;if(T.grp&&!gSeen.has(T.grp.id)){gSeen.add(T.grp.id);h+=`<div class="tlrow"><span></span><div class="tlgh"><span class="tlgtag">${esc(T.grp.name)} · group of ${gCount[T.grp.id]}</span><select class="menu" data-tgmenu="${T.grp.id}" aria-label="Group menu"><option value="">⋯</option><option value="dup">Duplicate group</option><option value="ren">Rename</option><option value="add">Add actions…</option><option value="ungroup">Ungroup</option><option value="del">Delete group</option></select></div></div>`}
+      h+=`<div class="tlrow">${tm}<div class="tlbody"><div class="tlcard${dn?" done":""}${nx?" next":""}${T.grp?" ing":""}"><div class="tlh"><input type="checkbox" data-tdone="${T.id}"${dn?" checked":""} aria-label="Mark ${esc(T.name)} done"><button type="button" class="tlx" data-tlx aria-label="Show details"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><b class="tln2">${n}</b><span class="tlnm">${esc(T.name)}</span><span class="tlmeta">${tVolTxt(T)||esc(T.kind||"")}</span>
         <select class="menu" data-tmenu="${T.id}" aria-label="Action menu"><option value="">⋯</option><option value="edit">Edit</option><option value="dup">Duplicate</option><option value="tpl">Save as template</option><option value="del">Delete</option></select></div>
         <div class="tld" hidden><p class="sub">${esc(nm(ps))}${T.grp?` · group: ${esc(T.grp.name)}`:""}${isTreat(T)?` · applies to ${appliesTo(unitsFor(ps),T).map(c=>esc(c.name)).join(", ")||"—"}`:""}</p>${T.note?`<p class="pre">${esc(T.note)}</p>`:""}${T.adv&&isTreat(T)?recipeHTML(unitsFor(ps),T):""}</div></div></div></div>`}});
   if(!nowDone&&ent.length&&lastDay!==null&&lastDay<=t0)h+=`<div class="tlnow"><span>Now ${hm24(now)}</span></div>`;
