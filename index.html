@@ -473,6 +473,18 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 .lineblk>summary .grip{margin-right:2px}
 .ecard[data-ph="act"]{border-left-color:#1fa5a9!important}.spill[data-ph="act"]{background:#1fa5a9!important;color:#fff!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .spill[data-ph="act"]{background:#5fd0d3!important;color:#0d2a2b!important}:root:not([data-theme="light"]) .ecard[data-ph="act"]{border-left-color:#5fd0d3!important}}
+.tlv{display:flex;flex-direction:column;gap:6px}[data-actv]{padding:5px 10px!important}
+.tlday{display:flex;align-items:baseline;gap:10px;font:700 14px var(--mono);letter-spacing:.04em;color:var(--hi);border-bottom:2px solid color-mix(in srgb,var(--hi) 35%,transparent);padding:10px 0 4px;margin-top:4px}
+.tlday span{font:600 11px var(--sans);color:#fff;background:var(--pk);padding:1px 8px;border-radius:9px;letter-spacing:0}.tlday.today{color:color-mix(in srgb,#c2255c 80%,var(--fg));border-color:var(--pk)}.tlday.past{opacity:.6}
+.tlrow{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;align-items:start}.tltime{font:700 14px var(--mono);text-align:right;padding-top:8px}
+.tlchip{display:inline-block;font:600 13px var(--sans);padding:5px 12px;border-radius:999px;margin-top:3px}.tlchip.seed{background:color-mix(in srgb,var(--yl) 30%,var(--bg));color:color-mix(in srgb,#9a6a00 85%,var(--fg))}.tlchip.harv{background:color-mix(in srgb,var(--c-harv) 20%,var(--bg));color:var(--c-harv)}.tlchip.done{opacity:.55}
+.tlcard{border:1.5px solid var(--line-strong);border-radius:12px;background:var(--bg);overflow:hidden}.tlcard.next{border-color:#1fa5a9;box-shadow:0 0 0 2px color-mix(in srgb,#1fa5a9 25%,transparent)}
+.tlh{display:flex;align-items:center;gap:8px;padding:8px 10px}.tlh input{width:22px;height:22px;flex:none}.tlx{background:none;border:0;color:var(--muted);font-size:14px;cursor:pointer;padding:0 2px;transition:transform .15s}.tlcard.open .tlx{transform:rotate(180deg)}
+.tln2{font:700 14px var(--mono);color:#1fa5a9}.tlnm{font-weight:600;font-size:15px;flex:1;min-width:0}.tlmeta{font:12px var(--mono);color:var(--muted);text-align:right;max-width:40%}.tlh select.menu{flex:none}
+.tld{border-top:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.tlcard.done{opacity:.6}.tlcard.done .tlnm{text-decoration:line-through}
+.tlnow{position:relative;height:18px;margin:2px 0}.tlnow::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--pk)}.tlnow span{position:relative;margin-left:56px;background:var(--pk);color:#fff;font:600 11px var(--sans);padding:1px 8px;border-radius:9px}
+@media (max-width:420px){.tlmeta{display:none}}
 @media (prefers-reduced-motion:reduce){.rain{animation:none}}
 @media (prefers-reduced-motion:reduce){.masc .face,.masc .eye{animation:none}}
 @media (prefers-reduced-motion:reduce){.scface.scr,.pane.crack{animation:none}}
@@ -554,7 +566,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.3.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.4.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -699,7 +711,7 @@ function wellIds(fmt){const f=VDEF[fmt];const out=[];for(let r=0;r<f.r;r++)for(l
 function simpleLayout(fmt,n,cpw,lineId){const lines={};wellIds(fmt).slice(0,n).forEach(w=>lines[w]=lineId||"");return{groups:[],wells:{},lines,dens:{[lineId||""]:cpw}}}
 function regen(P){resolveTimes(P);const old=Object.fromEntries((P.reminders||[]).map(r=>[r.id,r]));
   const keep=(P.reminders||[]).filter(r=>!r.tid&&!r.hid);
-  (P.treatments||[]).forEach(T=>{if(T.remind&&T.at)keep.push({id:"t_"+T.id,tid:T.id,kind:"Treatment",t:T.name,d:T.at,done:!!old["t_"+T.id]?.done})});
+  (P.treatments||[]).forEach(T=>{if(T.remind&&T.at)keep.push({id:"t_"+T.id,tid:T.id,kind:"Treatment",t:T.name,d:T.at,done:!!(old["t_"+T.id]?.done||T.done)})});
   (P.harvests||[]).forEach(Hv=>{const at=harvestAt(P,Hv);if(Hv.remind&&at)keep.push({id:"h_"+Hv.id,hid:Hv.id,kind:"Harvest",t:Hv.note||"",d:at,done:!!old["h_"+Hv.id]?.done})});
   P.reminders=keep;return P}
 function harvestAt(P,Hv){const ms=(num(Hv.after)||0)*(Hv.unit==="d"?DAY:Hv.unit==="min"?6e4:H);
@@ -1260,6 +1272,34 @@ function dupGroup(sc,gid){const {m,name}=grpInfo(sc,gid);if(!m.length)return;con
     const at=+new Date(fd.at);if(!at){toast("Pick a time.");return false}const sh=at-t0,ng={id:rid(),name:fd.nm.trim()||name+" (copy)"},idm=Object.fromEntries(m.map(g=>[g.T.id,rid()]));
     sc.forEach(p=>{const p2=clone(S.cultures[p.id]),add=[];(p2.treatments||[]).forEach(T=>{if(!(T.grp&&T.grp.id===gid))return;const c=clone(T);c.id=idm[T.id];c.grp=clone(ng);
       if(c.rel&&idm[c.rel.from])c.rel.from=idm[c.rel.from];else{delete c.rel;c.at=(T.at||t0)+sh}add.push(c)});if(add.length){p2.treatments=(p2.treatments||[]).concat(add);save("cultures",regen(p2))}});toast(`Duplicated as ${ng.name} ✦`)},"Duplicate")}
+/* ---- actions as a day-by-day timeline ---- */
+let actView=ls.get("actView","tl");
+const tDone=(T,ps)=>ps.every(P=>{const T2=(P.treatments||[]).find(x=>x.id===T.id)||{},r=(P.reminders||[]).find(x=>x.id==="t_"+T.id);return T2.done||(r&&r.done)});
+const hm24=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")},dayLbl=t=>{const d=new Date(t);return`${d.toLocaleDateString("en-GB",{weekday:"short"})} ${d.getDate()} ${d.toLocaleDateString("en-GB",{month:"short"})}`.toUpperCase()};
+function actTimeline(E,plates){const all=plates,now=Date.now(),t0=sod(now),ent=[];
+  const sd0={};all.forEach(P=>{if(!P.seededAt)return;(sd0[P.seededAt]=sd0[P.seededAt]||[]).push(P)});Object.entries(sd0).forEach(([at,ps])=>ent.push({at:+at,k:"seed",ps}));
+  const gs=treatGroups(all);gs.forEach(g=>ent.push({at:g.T.at||0,k:"act",g}));
+  const hv={};all.forEach(P=>(P.harvests||[]).forEach(Hv=>{const at=harvestAt(P,Hv);if(at)(hv[at]=hv[at]||[]).push(P)}));Object.entries(hv).forEach(([at,ps])=>ent.push({at:+at,k:"harv",ps}));
+  ent.sort((a,b)=>(a.at||9e15)-(b.at||9e15)||({seed:0,act:1,harv:2}[a.k]-{seed:0,act:1,harv:2}[b.k]));
+  let n=0,lastDay=null,nowDone=false,h="";const nm=ps=>ps.length===all.length&&all.length>1?"all plates":ps.map(p=>esc(p.label||p.vessel)).join(", ");
+  const nextAct=ent.find(e=>e.k==="act"&&!tDone(e.g.T,e.g.plates));
+  ent.forEach(e=>{const d=e.at?sod(e.at):null;
+    if(!nowDone&&e.at&&e.at>now&&lastDay!==null){if(d!==t0&&lastDay!==t0){h+=`<div class="tlday today"><b>${dayLbl(now)}</b><span>Today</span></div>`;lastDay=t0}h+=`<div class="tlnow"><span>Now ${hm24(now)}</span></div>`;nowDone=true}
+    if(d!==lastDay){h+=`<div class="tlday${d===t0?" today":""}${d!==null&&d<t0?" past":""}"><b>${d===null?"NO TIME SET":dayLbl(d)}</b>${d===t0?"<span>Today</span>":""}</div>`;lastDay=d}
+    const tm=`<span class="tltime">${e.at?hm24(e.at):"—"}</span>`;
+    if(e.k==="seed")h+=`<div class="tlrow">${tm}<div class="tlbody"><span class="tlchip seed">◆ Seed ${esc(nm(e.ps))}</span></div></div>`;
+    else if(e.k==="harv")h+=`<div class="tlrow">${tm}<div class="tlbody"><span class="tlchip harv${e.ps.every(p=>p.status==="ended")?" done":""}">◆ Harvest ${esc(nm(e.ps))}${e.ps.every(p=>p.status==="ended")?" ✓":""}</span></div></div>`;
+    else{const {T,plates:ps}=e.g,dn=tDone(T,ps),nx=nextAct&&nextAct.g.T.id===T.id;n++;
+      h+=`<div class="tlrow">${tm}<div class="tlbody"><div class="tlcard${dn?" done":""}${nx?" next":""}"><div class="tlh"><input type="checkbox" data-tdone="${T.id}"${dn?" checked":""} aria-label="Mark ${esc(T.name)} done"><button type="button" class="tlx" data-tlx aria-label="Show details">⌄</button><b class="tln2">${n}</b><span class="tlnm">${esc(T.name)}</span><span class="tlmeta">${tVolTxt(T)||esc(T.kind||"")}</span>
+        <select class="menu" data-tmenu="${T.id}" aria-label="Action menu"><option value="">⋯</option><option value="edit">Edit</option><option value="dup">Duplicate</option><option value="tpl">Save as template</option><option value="del">Delete</option></select></div>
+        <div class="tld" hidden><p class="sub">${esc(nm(ps))}${T.grp?` · group: ${esc(T.grp.name)}`:""}${isTreat(T)?` · applies to ${appliesTo(unitsFor(ps),T).map(c=>esc(c.name)).join(", ")||"—"}`:""}</p>${T.note?`<p class="pre">${esc(T.note)}</p>`:""}${T.adv&&isTreat(T)?recipeHTML(unitsFor(ps),T):""}</div></div></div></div>`}});
+  if(!nowDone&&ent.length&&lastDay!==null&&lastDay<=t0)h+=`<div class="tlnow"><span>Now ${hm24(now)}</span></div>`;
+  const done=ent.filter(e=>e.k==="act"&&tDone(e.g.T,e.g.plates)).length,tot=ent.filter(e=>e.k==="act").length;
+  return`<div class="bh"><h2 style="margin:0">Actions · ${done}/${tot} done</h2><div class="seg mini-seg" style="width:auto"><button type="button" data-actv="tl" aria-pressed="true">Timeline</button><button type="button" data-actv="list" aria-pressed="false">List</button></div></div>
+  ${ent.length?`<div class="tlv">${h}</div>`:`<p class="note">No actions yet.</p>`}
+  <div class="row"><button class="btn" data-act="treat">+ Action</button>${gs.filter(g=>!g.T.grp).length?`<button class="btn sm" data-act="grpActs">Group actions…</button>`:""}</div>`}
+function setActDone(T,ps,on){ps.forEach(P=>{const p2=clone(S.cultures[P.id]);const T2=(p2.treatments||[]).find(x=>x.id===T.id);if(!T2)return;T2.done=on;const r=(p2.reminders||[]).find(x=>x.id==="t_"+T.id);if(r)r.done=on;if(on)addLog(p2,`${T.name} done`,"rem");save("cultures",p2)});if(on)toast(cheer("rem"))}
+
 function treatSection(plates,multi){const gs=treatGroups(plates),done=new Set();
   const row=({T,plates:ps})=>`<div class="li" style="flex-wrap:wrap"><span class="when">${T.at?sd(T.at)+"<br>"+st(T.at):"time not set"}</span><span class="what">${esc(T.name)}<small>${multi?(ps.length===plates.length?"all plates":ps.map(p=>esc(p.label||p.vessel)).join(", "))+" · ":""}${tVolTxt(T)}${T.adv&&isTreat(T)&&tTypes(T).length>1?` · ${tTypes(T).length} types`:""}${T.remind?" · reminder on":""}</small></span>
     <select class="menu" data-tmenu="${T.id}" aria-label="Action menu"><option value="">⋯</option><option value="edit">Edit</option><option value="dup">Duplicate</option><option value="tpl">Save as template</option><option value="del">Delete</option></select>
@@ -1402,7 +1442,7 @@ function renderPlates0(){
         const fl=(E.srcs||[]).map(s=>S.cultures[s.flaskId]).filter(F=>F&&F.status==="active");return fl.length?`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(", ")} → seed ${sd(E.seedAt)}</span><div class="row"><button class="btn sm solid" data-act="expToSeed">Open in Seed</button><button class="btn sm ghost" data-act="planExp" data-id="${fl[0].id}" data-exp="${E.id}">Edit plan</button></div></div>`:`<p class="note">Tip: pick the flask you'll passage under Edit → Cells used, or plan it from a flask's ⋯ → Plan passage.</p>`})():""}
       ${E&&ps.length?expCellsTxt(E,ps):srcTxt?`<p class="sub">Cells: ${srcTxt}</p>`:""}${E.notes?`<p class="pre">${esc(E.notes)}</p>`:""}`:`<h3>Plates without an experiment</h3><div class="row"><button class="btn sm solid" data-act="newPlate" data-exp="_loose">+ Plate</button></div>`}
     ${E&&ps.length?`<h2>Timeline</h2>${timelineHTML(ps)}`:""}
-    ${E&&ps.length?treatSection(ps,true):""}
+    ${E&&ps.length?(actView==="list"?treatSection(ps,true).replace('<h2>Actions · whole experiment</h2>','<div class="bh"><h2 style="margin:0">Actions · whole experiment</h2><div class="seg mini-seg" style="width:auto"><button type="button" data-actv="tl" aria-pressed="false">Timeline</button><button type="button" data-actv="list" aria-pressed="true">List</button></div></div>'):actTimeline(E,ps.filter(c=>c.status!=="tpl"))):""}
     <h2>Plates</h2>
     ${ps.length?`<div style="display:flex;flex-direction:column;gap:8px">${ps.map(c=>plateDrop(c,E)).join("")}</div>`:`<p class="note">No plates yet.</p>`}
     ${E&&ps.some(c=>c.status==="planned")?`<div class="row"><button class="btn sm" data-act="expToSeed">Add to seeding plan</button><button class="btn sm" data-act="expSeeded">Mark all seeded</button></div>`:""}</div>`;
@@ -1432,6 +1472,10 @@ $("tab-plates").addEventListener("change",e=>{const t=e.target;
   if(t.id==="expPick"){openExp=t.value;ls.set("openExp",openExp);openPlate=null;selW.clear();editing=false;renderPlates();return}
   if(t.dataset.emenu!==undefined){const a=t.value;t.value="";const E=S.exps[openExp];if(!E)return;
     if(a==="edit")expForm(E);else if(a==="doc")exportProtocol(E);else if(a==="run")exportRun(E);else if(a==="tpl")saveExpTemplate(E);else if(a==="dup")dupExp(E);else if(a.startsWith("st:")){const E2=clone(E);E2.status=a.slice(3);save("exps",E2);toast("Status updated")}else if(a==="del")openSheet(`Delete ${E.name}?`,`<p class="note">Its plates stay, under "Plates without an experiment".</p>`,()=>{Object.values(S.cultures).filter(c=>c.expId===E.id).forEach(c=>{const c2=clone(c);c2.expId="";save("cultures",c2)});remove("exps",E.id);openExp="";expView="list";ls.set("expView","list")},"Delete experiment");return}
+  if(t.dataset.tdone){const E=S.exps[openExp],sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout):[],g=treatGroups(sc).find(x=>x.T.id===t.dataset.tdone);if(g)setActDone(g.T,g.plates,t.checked);t.blur();renderPlates();return}
+  if(t.dataset.tmenu!==undefined&&!S.cultures[openPlate]&&S.exps[openExp]){const a=t.value;t.value="";const E=S.exps[openExp],sc=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"),g=treatGroups(sc).find(x=>x.T.id===t.dataset.tmenu);if(!g)return;
+    if(a==="edit")treatForm(sc,g.T,g.plates.map(p=>p.id));else if(a==="dup"){const c=clone(g.T);c.id=rid();delete c.grp;c.name=(c.name+" (copy)").slice(0,50);treatForm(sc,c,g.plates.map(p=>p.id))}
+    else if(a==="tpl")storeTemplate("templates",treatToTemplate(g.T,(g.plates[0]||{}).vessel),"treatment");else if(a==="del")openSheet(`Delete ${g.T.name}?`,`<p class="note">Removes it from ${g.plates.length} plate${g.plates.length>1?"s":""} with its reminders.</p>`,()=>{g.plates.forEach(p=>{const p2=clone(S.cultures[p.id]);p2.treatments=(p2.treatments||[]).filter(x=>x.id!==g.T.id);save("cultures",regen(p2))})},"Delete");return}
   if(t.dataset.tgmenu!==undefined){const a=t.value;t.value="";if(!a)return;const gid=t.dataset.tgmenu,E=S.exps[openExp],P0=S.cultures[openPlate],sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P0?[P0]:[]);
     const go=()=>sc.forEach(p=>{const p2=clone(S.cultures[p.id]);if(!(p2.treatments||[]).some(T=>T.grp&&T.grp.id===gid))return;if(a==="del")p2.treatments=p2.treatments.filter(T=>!(T.grp&&T.grp.id===gid));else p2.treatments.forEach(T=>{if(T.grp&&T.grp.id===gid)delete T.grp});save("cultures",regen(p2))});
     if(a==="dup")return dupGroup(sc,gid);if(a==="ren")return renGroup(sc,gid);if(a==="add")return grpActs(sc,gid);
@@ -1448,7 +1492,7 @@ $("tab-plates").addEventListener("change",e=>{const t=e.target;
   if(t.dataset.hmenu!==undefined){const a=t.value;t.value="";const Hv=(P.harvests||[])[0];if(!Hv)return;
     if(a==="edit")harvestForm(P,Hv);else if(a==="del"){const P2=clone(P);P2.harvests=[];save("cultures",regen(P2))}}});
 $("tab-plates").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("div.ecard")){e.preventDefault();e.target.click()}});
-$("tab-plates").addEventListener("click",e=>{const t=e.target;{const sb=t.closest("[data-eseg] button");if(sb){expSeg=sb.dataset.v;ls.set("expSeg",expSeg);renderPlates();return}}
+$("tab-plates").addEventListener("click",e=>{const t=e.target;{const v=t.closest("[data-actv]");if(v){actView=v.dataset.actv;ls.set("actView",actView);renderPlates();return}const x=t.closest("[data-tlx]");if(x){const c=x.closest(".tlcard"),d=c.querySelector(".tld");d.hidden=!d.hidden;c.classList.toggle("open",!d.hidden);return}}{const sb=t.closest("[data-eseg] button");if(sb){expSeg=sb.dataset.v;ls.set("expSeg",expSeg);renderPlates();return}}
   if(t.closest("select")||t.closest("input")||t.closest("summary"))return;
   const et=t.closest("[data-etag]");if(et){expTag=et.dataset.etag;ls.set("expTag",expTag);openPlate=null;renderPlates();return}
   const hl=t.closest("[data-hl]");if(hl){hlG=hlG&&hlG.g===hl.dataset.hl&&hlG.p===hl.dataset.hp?null:{p:hl.dataset.hp,g:hl.dataset.hl};renderPlates();return}
