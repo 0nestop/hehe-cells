@@ -554,7 +554,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.3.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.3.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1245,15 +1245,30 @@ function treatGroups(plates){const m={};plates.forEach(P=>(P.treatments||[]).for
 function condsFor(plates){const m={};plates.forEach(P=>{const nm=Object.fromEntries((P.layout.groups||[]).map(g=>[g.id,g.name]));
   (P.layout.groups||[]).forEach(g=>{m[g.name]=m[g.name]||{id:g.name,name:g.name,n:0}});Object.values(P.layout.wells||{}).forEach(gid=>{const n=nm[gid];if(n)m[n].n++})});return Object.values(m)}
 function tVolTxt(T){if(!isTreat(T))return esc(T.kind);const fv=num(T.finalVol)||num(T.vol),tv=num(T.vol)||fv;return tv>0?`${vol(tv)}/well${fv>tv?` + ${vol(fv-tv)} ${esc(T.topup||"medium")}`:""}`:""}
+function grpInfo(sc,gid){const m=treatGroups(sc).filter(g=>g.T.grp&&g.T.grp.id===gid);return{m,name:m[0]?m[0].T.grp.name:""}}
+function grpActs(sc,gid){const free=treatGroups(sc).filter(g=>!g.T.grp),grps=[...new Map(treatGroups(sc).filter(g=>g.T.grp).map(g=>[g.T.grp.id,g.T.grp.name])).entries()];
+  if(!free.length){toast("Every action is already in a group.");return}
+  openSheet(gid?`Add to ${grpInfo(sc,gid).name}`:"Group actions",`<div class="list">${free.map(g=>`<label class="li check"><input type="checkbox" name="a_${g.T.id}"><span class="what">${esc(g.T.name)}<small>${g.T.at?sd(g.T.at)+", "+st(g.T.at):"time not set"}${g.plates.length<sc.length?` · ${g.plates.length} plate${g.plates.length>1?"s":""}`:""}</small></span></label>`).join("")}</div>
+    ${gid?`<input type="hidden" name="gsel" value="${gid}">`:`<label>Put them in<select name="gsel" class="txt"><option value="__new">A new group</option>${grps.map(([id,nm])=>`<option value="${id}">${esc(nm)}</option>`).join("")}</select></label>${SF("New group name","gname","","text","","full")}`}`,fd=>{
+    const ids=free.map(g=>g.T.id).filter(id=>fd["a_"+id]);if(!ids.length){toast("Tick at least one action.");return false}
+    let grp;if(fd.gsel&&fd.gsel!=="__new")grp={id:fd.gsel,name:(grps.find(x=>x[0]===fd.gsel)||[0,grpInfo(sc,fd.gsel).name])[1]};else{const nm=(fd.gname||"").trim();if(!nm){toast("Name the group.");return false}grp={id:rid(),name:nm}}
+    sc.forEach(p=>{const p2=clone(S.cultures[p.id]);let ch=false;(p2.treatments||[]).forEach(T=>{if(ids.includes(T.id)){T.grp=clone(grp);ch=true}});if(ch)save("cultures",regen(p2))});toast(`Grouped into ${grp.name} ✦`)},gid?"Add":"Group")}
+function renGroup(sc,gid){const {name}=grpInfo(sc,gid);openSheet("Rename group",SF("Group name","nm",name,"text","","full"),fd=>{const nm=fd.nm.trim();if(!nm)return false;
+  sc.forEach(p=>{const p2=clone(S.cultures[p.id]);let ch=false;(p2.treatments||[]).forEach(T=>{if(T.grp&&T.grp.id===gid){T.grp.name=nm;ch=true}});if(ch)save("cultures",p2)})})}
+function dupGroup(sc,gid){const {m,name}=grpInfo(sc,gid);if(!m.length)return;const ord=m.slice().sort((a,b)=>(a.T.at||0)-(b.T.at||0)),t0=ord.find(g=>g.T.at)?.T.at||tomorrow10();
+  openSheet(`Duplicate ${name}`,`${SF("Name","nm",name+" (copy)","text","","full")}${SF("First step at","at",isoDT(t0+DAY),"datetime-local","","full")}<p class="note">Copies all ${m.length} steps onto the same plates. Steps keep their spacing.</p>`,fd=>{
+    const at=+new Date(fd.at);if(!at){toast("Pick a time.");return false}const sh=at-t0,ng={id:rid(),name:fd.nm.trim()||name+" (copy)"},idm=Object.fromEntries(m.map(g=>[g.T.id,rid()]));
+    sc.forEach(p=>{const p2=clone(S.cultures[p.id]),add=[];(p2.treatments||[]).forEach(T=>{if(!(T.grp&&T.grp.id===gid))return;const c=clone(T);c.id=idm[T.id];c.grp=clone(ng);
+      if(c.rel&&idm[c.rel.from])c.rel.from=idm[c.rel.from];else{delete c.rel;c.at=(T.at||t0)+sh}add.push(c)});if(add.length){p2.treatments=(p2.treatments||[]).concat(add);save("cultures",regen(p2))}});toast(`Duplicated as ${ng.name} ✦`)},"Duplicate")}
 function treatSection(plates,multi){const gs=treatGroups(plates),done=new Set();
   const row=({T,plates:ps})=>`<div class="li" style="flex-wrap:wrap"><span class="when">${T.at?sd(T.at)+"<br>"+st(T.at):"time not set"}</span><span class="what">${esc(T.name)}<small>${multi?(ps.length===plates.length?"all plates":ps.map(p=>esc(p.label||p.vessel)).join(", "))+" · ":""}${tVolTxt(T)}${T.adv&&isTreat(T)&&tTypes(T).length>1?` · ${tTypes(T).length} types`:""}${T.remind?" · reminder on":""}</small></span>
     <select class="menu" data-tmenu="${T.id}" aria-label="Action menu"><option value="">⋯</option><option value="edit">Edit</option><option value="dup">Duplicate</option><option value="tpl">Save as template</option><option value="del">Delete</option></select>
     ${T.adv&&isTreat(T)?`<details style="flex-basis:100%"><summary>Recipe</summary><div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${recipeHTML(unitsFor(ps),T)}</div></details>`:""}</div>`;
   let body="";gs.forEach(g=>{const gr=g.T.grp;if(!gr){body+=row(g);return}if(done.has(gr.id))return;done.add(gr.id);const mem=gs.filter(x=>x.T.grp&&x.T.grp.id===gr.id);
-    body+=`<div class="tgrp"><div class="tgh"><b>${esc(gr.name)}</b><span class="spill">group · ${mem.length}</span><select class="menu" data-tgmenu="${gr.id}" aria-label="Group menu" style="margin-left:auto"><option value="">⋯</option><option value="del">Delete group</option><option value="ungroup">Ungroup</option></select></div><div class="list">${mem.map(row).join("")}</div></div>`});
+    body+=`<div class="tgrp"><div class="tgh"><b>${esc(gr.name)}</b><span class="spill">group · ${mem.length}</span><select class="menu" data-tgmenu="${gr.id}" aria-label="Group menu" style="margin-left:auto"><option value="">⋯</option><option value="dup">Duplicate group</option><option value="ren">Rename</option><option value="add">Add actions…</option><option value="ungroup">Ungroup</option><option value="del">Delete group</option></select></div><div class="list">${mem.map(row).join("")}</div></div>`});
   return`<h2>Actions${multi?" · whole experiment":""}</h2>
   ${gs.length?`<div class="list tlist">${body}</div>`:`<p class="note">No actions yet. Treatments, imaging, PrestoBlue…</p>`}
-  <div class="row"><button class="btn" data-act="treat">+ Action</button>${gs.length?`<button class="btn ghost sm" data-act="clearActs" style="margin-left:auto">Clear all</button>`:""}</div>`}
+  <div class="row"><button class="btn" data-act="treat">+ Action</button>${gs.filter(g=>!g.T.grp).length?`<button class="btn sm" data-act="grpActs">Group actions…</button>`:""}${gs.length?`<button class="btn ghost sm" data-act="clearActs" style="margin-left:auto">Clear all</button>`:""}</div>`}
 function plateEvents(P){const ev=[{d:P.seededAt,k:"seed",t:`Seed ${P.label||P.vessel}`}];(P.treatments||[]).forEach(T=>{if(T.at)ev.push({d:T.at,k:"treat",t:T.name})});
     (P.harvests||[]).forEach(Hv=>{const at=harvestAt(P,Hv);if(at)ev.push({d:at,k:"harv",t:`Harvest ${P.label||P.vessel}`})});return ev}
 function timelineHTML(ps){return timelineCore(ps.map(P=>({label:P.label||P.vessel,ev:plateEvents(P)})))}
@@ -1419,6 +1434,7 @@ $("tab-plates").addEventListener("change",e=>{const t=e.target;
     if(a==="edit")expForm(E);else if(a==="doc")exportProtocol(E);else if(a==="run")exportRun(E);else if(a==="tpl")saveExpTemplate(E);else if(a==="dup")dupExp(E);else if(a.startsWith("st:")){const E2=clone(E);E2.status=a.slice(3);save("exps",E2);toast("Status updated")}else if(a==="del")openSheet(`Delete ${E.name}?`,`<p class="note">Its plates stay, under "Plates without an experiment".</p>`,()=>{Object.values(S.cultures).filter(c=>c.expId===E.id).forEach(c=>{const c2=clone(c);c2.expId="";save("cultures",c2)});remove("exps",E.id);openExp="";expView="list";ls.set("expView","list")},"Delete experiment");return}
   if(t.dataset.tgmenu!==undefined){const a=t.value;t.value="";if(!a)return;const gid=t.dataset.tgmenu,E=S.exps[openExp],P0=S.cultures[openPlate],sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P0?[P0]:[]);
     const go=()=>sc.forEach(p=>{const p2=clone(S.cultures[p.id]);if(!(p2.treatments||[]).some(T=>T.grp&&T.grp.id===gid))return;if(a==="del")p2.treatments=p2.treatments.filter(T=>!(T.grp&&T.grp.id===gid));else p2.treatments.forEach(T=>{if(T.grp&&T.grp.id===gid)delete T.grp});save("cultures",regen(p2))});
+    if(a==="dup")return dupGroup(sc,gid);if(a==="ren")return renGroup(sc,gid);if(a==="add")return grpActs(sc,gid);
     if(a==="del")openSheet("Delete this group?",`<p class="note">Removes all of its actions and their reminders.</p>`,go,"Delete");else go();return}
   const P=S.cultures[openPlate];if(!P)return;
   if(t.dataset.dens!==undefined){const P2=clone(P);P2.layout.dens[t.dataset.dens]=(num(t.value)*1e3)||0;if(t.dataset.dens===P2.lineId)P2.seeded=(num(t.value)*1e3)||0;save("cultures",P2);return}
@@ -1892,6 +1908,7 @@ document.addEventListener("click",e=>{
   if(a==="expDoc"&&E)return exportProtocol(E);
   if(a==="expRun"&&E)return exportRun(E);
   if(a==="clearActs"){const sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P?[P]:[]);return openSheet("Clear all actions?",`<p class="note">Removes every action${E?" in this experiment":" on this plate"}, with their reminders. Harvests stay.</p>`,()=>{sc.forEach(p=>{const p2=clone(S.cultures[p.id]);p2.treatments=[];save("cultures",regen(p2))});toast("Actions cleared")},"Clear all")}
+  if(a==="grpActs")return grpActs(E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P?[P]:[]));
   if(a==="tplSave"&&E)return tplDraftEnd(E,true);
   if(a==="tplDiscard"&&E)return openSheet("Discard these changes?",`<p class="note">The saved template stays as it was.</p>`,()=>tplDraftEnd(E,false),"Discard");
   if(a==="qDoc"||a==="qRun"){const E2=S.exps[b.dataset.exp];if(E2)(a==="qDoc"?exportProtocol:exportRun)(E2);return}
