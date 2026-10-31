@@ -567,7 +567,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.4.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.4.2",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1472,7 +1472,7 @@ function photoSheet(C){const ph=C.photos||[];
 $("tab-plates").addEventListener("change",e=>{const t=e.target;
   if(t.id==="expPick"){openExp=t.value;ls.set("openExp",openExp);openPlate=null;selW.clear();editing=false;renderPlates();return}
   if(t.dataset.emenu!==undefined){const a=t.value;t.value="";const E=S.exps[openExp];if(!E)return;
-    if(a==="edit")expForm(E);else if(a==="doc")exportProtocol(E);else if(a==="run")exportRun(E);else if(a==="tpl")saveExpTemplate(E);else if(a==="dup")dupExp(E);else if(a.startsWith("st:")){const E2=clone(E);E2.status=a.slice(3);save("exps",E2);toast("Status updated")}else if(a==="del")openSheet(`Delete ${E.name}?`,`<p class="note">Its plates stay, under "Plates without an experiment".</p>`,()=>{Object.values(S.cultures).filter(c=>c.expId===E.id).forEach(c=>{const c2=clone(c);c2.expId="";save("cultures",c2)});remove("exps",E.id);openExp="";expView="list";ls.set("expView","list")},"Delete experiment");return}
+    if(a==="edit")expForm(E);else if(a==="doc")exportProtocol(E);else if(a==="run")exportRun(E);else if(a==="tpl")saveExpTemplate(E);else if(a==="dup")dupExp(E);else if(a.startsWith("st:")){const E2=clone(E);E2.status=a.slice(3);save("exps",E2);toast("Status updated")}else if(a==="del"){const pls=Object.values(S.cultures).filter(c=>c.expId===E.id);openSheet(`Delete ${E.name}?`,`<p class="note">This deletes the experiment and its ${pls.length} plate${pls.length===1?"":"s"}, with their layouts, actions, harvests and photos. It can't be undone.</p>`,()=>{pls.forEach(c=>{const ph=c.photos||[];remove("cultures",c.id);if(ASSETS)ph.forEach(p=>ASSETS.delete(p.id).catch(()=>{}))});Object.values(S.cultures).filter(c=>c.plan&&(c.plan.exps||[]).includes(E.id)).forEach(c=>{const c2=clone(c);c2.plan.exps=c2.plan.exps.filter(x=>x!==E.id);save("cultures",c2)});remove("exps",E.id);openExp="";expView="list";ls.set("expView","list");toast("Experiment deleted")},"Delete experiment")}return}
   if(t.dataset.tdone){const E=S.exps[openExp],sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout):[],g=treatGroups(sc).find(x=>x.T.id===t.dataset.tdone);if(g)setActDone(g.T,g.plates,t.checked);t.blur();renderPlates();return}
   if(t.dataset.tmenu!==undefined&&!S.cultures[openPlate]&&S.exps[openExp]){const a=t.value;t.value="";const E=S.exps[openExp],sc=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"),g=treatGroups(sc).find(x=>x.T.id===t.dataset.tmenu);if(!g)return;
     if(a==="edit")treatForm(sc,g.T,g.plates.map(p=>p.id));else if(a==="dup"){const c=clone(g.T);c.id=rid();delete c.grp;c.name=(c.name+" (copy)").slice(0,50);treatForm(sc,c,g.plates.map(p=>p.id))}
