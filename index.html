@@ -569,7 +569,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.4.3",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.4.4",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -725,7 +725,7 @@ function nextRem(C){return(C.reminders||[]).filter(r=>!r.done).sort((a,b)=>a.d-b
 const TABS=["today","seed","cultures","plates","settings"];
 function showTab(t){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
   TABS.forEach(x=>$("tab-"+x).hidden=x!==t);ls.set("tab",t);window.scrollTo(0,0)}
-document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{const t=b.dataset.tab;if(t==="plates"){expSeg="active";ls.set("expSeg","active")}if(t==="cultures"){cview="active";ls.set("cview","active")}showTab(t);if(t==="plates")renderPlates();if(t==="cultures")renderCultures()}));
 
 /* ================= sheet ================= */
 let sheetSubmit=null;
@@ -742,7 +742,7 @@ const SF=(label,name,val="",type="number",unit="",cls="")=>{const inp=`<input na
   return`<label${cls?` class="${cls}"`:""}>${label}${unit?`<div class="unit">${inp}<em>${unit}</em></div>`:inp}</label>`};
 const linesSorted=()=>Object.values(S.lines).sort((a,b)=>(a.order??1e9)-(b.order??1e9)||a.name.localeCompare(b.name));
 const lineOpts=sel=>`<option value="">— no line —</option>`+linesSorted().map(L=>`<option value="${L.id}"${L.id===sel?" selected":""}>${esc(L.name)}</option>`).join("");
-const expOpts=sel=>`<option value="">— no experiment —</option>`+Object.values(S.exps).filter(E=>!E.tplOf||E.id===sel).sort((a,b)=>(b.created||0)-(a.created||0)).map(E=>`<option value="${E.id}"${E.id===sel?" selected":""}>${esc(E.name)}</option>`).join("");
+const expOpts=sel=>`<option value="">— no experiment —</option>`+Object.values(S.exps).filter(E=>E.id===sel||(!E.tplOf&&expStatus(E)!=="done")).sort((a,b)=>(b.created||0)-(a.created||0)).map(E=>`<option value="${E.id}"${E.id===sel?" selected":""}>${esc(E.name)}</option>`).join("");
 const flasksActive=()=>Object.values(S.cultures).filter(c=>c.status==="active"&&!isPlate(c.vessel)).sort((a,b)=>srcName(a).localeCompare(srcName(b)));
 /* save into a template list, asking when the name already exists */
 function storeTemplate(key,obj,what){const list=S.settings[key]||[],ex=list.find(x=>x.name===obj.name);
@@ -1168,7 +1168,7 @@ function plateForm(C,expId0){const expId=expId0==="_loose"?"":expId0;const isNew
   const follows=C.status!=="active"&&E;
   openSheet(isNew?"New plate":"Edit plate",`<div class="grid">
     ${SF("Name (optional)","label",C.label===C.vessel+" plate"?"":(C.label||""),"text","","full")}
-    <label class="full">Experiment<select name="expId" class="txt">${isNew&&!C.expId&&expIdRaw!=="_loose"?`<option value="__new" selected>+ New experiment for this plate</option>`:""}${expOpts(C.expId)}</select></label>
+    <label class="full">Experiment<select name="expId" class="txt"><option value="__new"${isNew&&!C.expId&&expIdRaw!=="_loose"?" selected":""}>+ New experiment for this plate</option>${expOpts(C.expId)}</select></label>
     <label>Format<select name="vessel" class="txt"${isNew?"":" disabled"}>${opts(vlist("plate",C.vessel),C.vessel)}</select></label>
     <label>Main cell line<select name="lineId" class="txt">${lineOpts(C.lineId)}</select></label>
     ${isNew?SF("Cells per well","cells",shw(defaultSeed(S.lines[C.lineId],C.vessel),1e3),"number","k cells","full"):""}
@@ -1338,7 +1338,7 @@ function plateBody(C,E){const ci=condItems(C),li=lineItems(C).concat(E?(E.srcs||
     ${plateMap(C)}
     ${editing?`<div class="pal"><div class="seg mini-seg"><button type="button" data-pmode="line" aria-pressed="${pmode==="line"}">Cell lines</button><button type="button" data-pmode="cond" aria-pressed="${pmode==="cond"}">Conditions</button><button type="button" data-pmode="mark" aria-pressed="${pmode==="mark"}">Groups</button></div>
       <div class="palgrid">${items.map(x=>`<div class="pi"><button type="button" class="pb" data-pal="${esc(x.key)}"${pmode==="cond"?` data-sh="${x.sh}"`:""} title="${selW.size?"Assign selected wells":"Select these wells"}">${pmode==="cond"?`<span class="sw"></span>`:`<b style="font-family:var(--mono);font-size:11px">${esc(x.ab)}</b>`}<span class="nm">${esc(x.name)}</span><span class="n">${x.n}</span></button>${pmode!=="line"?`<button type="button" class="pe" data-act="${pmode==="cond"?"editGroup":"editMark"}" data-gid="${x.key}" aria-label="Edit ${esc(x.name)}">✎</button>`:""}</div>
-      ${pmode==="line"?`<label style="flex-direction:row;align-items:center;gap:4px;font-size:11px"><input type="number" min="0" inputmode="decimal" data-dens="${esc(x.key)}" value="${esc(shw(x.cells,1e3))}"> k cells/well</label>`:""}`).join("")}</div>
+      `).join("")}</div>
       <div class="row">${pmode==="cond"?`<button type="button" class="btn sm" data-act="newGroup">+ Condition</button>${(S.settings.condSets||[]).length?`<select class="txt" data-loadset style="width:auto;font-size:12px;padding:6px"><option value="">+ Load a set…</option>${S.settings.condSets.map(g=>`<option value="${g.id}">${esc(g.name)} (${g.items.length})</option>`).join("")}</select>`:""}`:pmode==="mark"?`<button type="button" class="btn sm" data-act="newMark"${selW.size?"":" disabled"}>+ Group selected wells</button>`:`<select class="txt" data-addline style="font-size:12px;padding:6px;width:auto"><option value="">+ Cell line…</option>${linesSorted().filter(L=>!items.some(x=>x.key===L.id)).map(L=>`<option value="${L.id}">${esc(L.name)}</option>`).join("")}</select>`}
       <button type="button" class="btn sm ghost" data-act="unassign"${selW.size?"":" disabled"}>Clear ${what}</button></div>
       <p class="note" style="font-size:12px">${selW.size?`${selW.size} selected. Tap a ${what} to assign it${pmode==="mark"?", or make a new group":""}.`:pmode==="mark"?"Groups mark wells on top of conditions, e.g. 4 corner wells without ascorbic acid, or wells seeded at a different density. Select wells, then add a group.":`Tap wells, a row or a column, then a ${what}.`}</p></div>`
@@ -1400,10 +1400,11 @@ function plateIcon(vessel,faded){const f=VDEF[vessel];if(!f||!f.r)return"";const
   for(let i=0;i<f.r;i++)for(let j=0;j<f.c;j++)d+=`<circle cx="${(px+dx*(j+.5)).toFixed(2)}" cy="${(py+dy*(i+.5)).toFixed(2)}" r="${r.toFixed(2)}"/>`;
   return`<svg class="pic${faded?" off":""}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(vessel)}"><title>${esc(vessel)}</title><rect x=".6" y=".6" width="${W-1.2}" height="${H-1.2}" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.1"/><g fill="currentColor">${d}</g></svg>`}
 function expPhase(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&(c.status==="active"||c.status==="planned"));const rem=ps.flatMap(nextRem);return rem.some(r=>r.kind!=="Harvest")?"act":"harv"}
+function seedMissed(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl");return ps.length>0&&ps.every(c=>c.status==="planned")&&ps.some(c=>c.seededAt&&c.seededAt<sod(Date.now()))}
 function expCard(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl"),st=expStatus(E),rem=st==="planning"||st==="done"?[]:ps.filter(c=>c.status!=="ended").flatMap(nextRem).sort((a,b)=>a.d-b.d);
   const ph=st==="running"?expPhase(E):"";return`<div role="button" tabindex="0" class="ecard" data-st="${st}"${ph?` data-ph="${ph}"`:""} data-act="openExp" data-exp="${E.id}" data-sid="${E.id}"><span class="grip egrip" data-grip aria-label="Drag to reorder">⠿</span><span class="eq"><button type="button" class="btn ghost sm" data-act="qDoc" data-exp="${E.id}" aria-label="Download protocol for ${esc(E.name)}">Protocol ⤓</button><button type="button" class="btn ghost sm" data-act="qRun" data-exp="${E.id}" aria-label="Export ${esc(E.name)} for Hehe.. Run">Run ⤓</button></span>${(()=>{const tg=sortTags(E.tags||[]),pill=`<span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`,lns=[...new Set(ps.flatMap(plateLines))].map(id=>S.lines[id]).filter(Boolean).map(L=>L.name);
     return`${ps.length?`<span class="picons">${ps.slice().sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true})).map(P=>plateIcon(P.vessel,P.status==="ended"&&st!=="done")).join("")}</span>`:""}<span class="l1 e1">${tg.length?tagSet([tg[0]]):""}<b class="${tg.length?"enm":""}">${esc(E.name)}</b>${pill}</span>${tg.length>1?`<span class="l1">${tagSet(tg.slice(1))}</span>`:""}${lns.length?`<span class="elines">${lns.map(esc).join(" · ")}</span>`:""}`})()}
-    <span class="sub">${st==="planning"&&E.seedAt?`seed ${sdd(E.seedAt)}`:""}${rem.length?`${st==="planning"&&E.seedAt?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}</span></div>`}
+    <span class="sub">${st==="planning"?(seedMissed(E)?`<span class="warnc">Seed date not set</span>`:E.seedAt?`seed ${sdd(E.seedAt)}`:""):""}${rem.length&&!seedMissed(E)?`${st==="planning"?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}</span></div>`}
 function renderPlates(){renderPlates0();tlInit($("tab-plates"))}
 function renderPlates0(){
   const el=$("tab-plates");let exps=Object.values(S.exps).filter(x=>!x.tplOf).sort(expOrd);
@@ -1440,6 +1441,7 @@ function renderPlates0(){
   h+=`<div class="block thick">${E?`<div class="bh"><div class="etitle">${tagSet(E.tags)}<h3>${esc(E.name)}${st?(()=>{const ph=st==="running"?expPhase(E):"";return` <span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`})():""}</h3></div><span class="row" style="gap:8px"><span class="sub">${ps.length} plate${ps.length===1?"":"s"}</span>${E.tplOf?"":`<select class="menu" data-emenu aria-label="Experiment actions"><option value="">⋯</option><option value="run">Export for Hehe.. Run</option><option value="doc">Export protocol (Word)</option><option value="tpl">Save as template</option><option value="dup">Duplicate</option><option value="del">Delete</option></select>`}</span></div>
       <div class="row"><button class="btn sm solid" data-act="newPlate" data-exp="${E.id}">+ Plate</button><button class="btn sm" data-act="expEdit">Edit</button><button class="btn sm" data-act="expDoc">Protocol ⤓</button><button class="btn sm" data-act="expRun">Hehe.. Run ⤓</button>
       </div>
+      ${!E.tplOf&&seedMissed(E)?`<div class="callout" style="border-color:var(--warn)!important;background:color-mix(in srgb,var(--warn) 8%,var(--bg))!important"><b style="color:var(--warn)!important">Seed date not set</b><p class="note" style="margin:0">The planned seeding (${sd(E.seedAt||Date.now())}) has passed, so its actions are off the schedule. Pick a new seeding date and everything moves with it.</p><div class="row"><button class="btn sm solid" data-act="expEdit" style="background:var(--warn);border-color:var(--warn);color:#fff">Set seeding date</button></div></div>`:""}
       ${E.tplOf?`<div class="callout"><b>Template draft</b><p class="note" style="margin:4px 0 8px">Changes here only go into the template. Nothing is scheduled. Dates count from the planned seeding.</p><div class="row"><button class="btn sm solid" data-act="tplSave">Save template</button><button class="btn sm ghost" data-act="tplDiscard">Discard</button></div></div>`:""}
       ${E&&!E.tplOf&&ps.some(c=>c.status==="planned")?(()=>{const h=planHost(E.id);if(h){const pl=h.plan,fl=(pl.srcs||[h.id]).map(id=>S.cultures[id]).filter(Boolean);return`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(" + ")}${fl.length>1?" (pooled)":""} → ${sd(pl.at)}</span><div class="row"><button class="btn sm solid" data-act="startPlan" data-id="${h.id}">Start passage</button><button class="btn sm ghost" data-act="planP" data-id="${h.id}">Edit plan</button></div></div>`}
         const fl=(E.srcs||[]).map(s=>S.cultures[s.flaskId]).filter(F=>F&&F.status==="active");return fl.length?`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(", ")} → seed ${sd(E.seedAt)}</span><div class="row"><button class="btn sm solid" data-act="expToSeed">Open in Seed</button><button class="btn sm ghost" data-act="planExp" data-id="${fl[0].id}" data-exp="${E.id}">Edit plan</button></div></div>`:`<p class="note">Tip: pick the flask you'll passage under Edit → Cells used, or plan it from a flask's ⋯ → Plan passage.</p>`})():""}
@@ -1651,12 +1653,13 @@ function events(end){const now=Date.now(),items=[],tgt=S.settings.targetConf||90
     const nm=nextMedia(C),e=num(C.mediaEvery);
     if(nm!=null){items.push({d:nm,kind:"Media",c:C,type:"media"});
       let t=nm;for(let k=0;k<60;k++){t=shiftWknd(t+e*DAY);if(t>=end)break;if(t>nm)items.push({d:t,kind:"Media",c:C,type:"media",proj:true})}}
-    if(C.status==="planned")items.push({d:C.seededAt,kind:"Seed plate",c:C,type:"seed",time:true});
-    (C.reminders||[]).forEach(r=>{if(!r.done)items.push({d:r.d,kind:r.kind,t:r.t,c:C,type:"rem",rid:r.id,time:true})});
+    const stale=C.status==="planned"&&C.seededAt&&C.seededAt<sod(now);
+    if(C.status==="planned")items.push({d:C.seededAt,kind:"Seed plate",c:C,type:"seed",time:true,stale});
+    if(!stale)(C.reminders||[]).forEach(r=>{if(!r.done)items.push({d:r.d,kind:r.kind,t:r.t,c:C,type:"rem",rid:r.id,time:true})});
     const ta=C.status==="active"&&!C.layout?confAt(C,tgt):null;if(ta&&ta>=sod(now))items.push({d:ta,kind:`~${tgt}% confluent`,c:C,type:"conf"});
     if(C.status==="active"&&C.plan&&C.plan.at)items.push({d:C.plan.at,kind:"Passage",t:C.plan.note||"",c:C,plan:C.plan,type:"pass",time:true});
   });
-  Object.values(S.exps).forEach(E=>{if(E.tplOf||!E.seedAt||!Object.values(S.cultures).some(c=>c.expId===E.id&&c.status==="planned"))return;
+  Object.values(S.exps).forEach(E=>{if(E.tplOf||!E.seedAt||E.seedAt<sod(now)||!Object.values(S.cultures).some(c=>c.expId===E.id&&c.status==="planned"))return;
     if(planHost(E.id))return;const pool=(E.srcs||[]).map(s=>S.cultures[s.flaskId]).filter(F=>F&&F.status==="active"&&!(F.plan&&sod(F.plan.at)===sod(E.seedAt)));if(pool.length)items.push({d:E.seedAt,kind:"Passage",c:pool[0],E,pool:pool.map(F=>F.id),type:"pass",time:true})});
   const cov=new Set();items.forEach(i=>{if(i.type!=="pass")return;if(i.E)cov.add(i.E.id+"|"+sod(i.d));(i.plan&&i.plan.exps||[]).forEach(id=>cov.add(id+"|"+sod(i.d)))});
   return items.filter(i=>i.d<end&&!(i.type==="seed"&&i.c.expId&&cov.has(i.c.expId+"|"+sod(i.d)))).sort((a,b)=>a.d-b.d)}
