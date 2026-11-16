@@ -148,7 +148,7 @@ details.exp .xin{border-top:1px solid var(--line);padding:8px;display:flex;flex-
 .well[data-sh]:not([data-sh="0"]){background:var(--sh)}
 .well[data-sh="4"],.well[data-sh="5"],.well[data-sh="6"]{color:var(--wfg)}
 .sw{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid var(--line-strong);vertical-align:-1px;margin-right:5px;background:var(--sh,var(--bg));flex:none}
-.plate.p96 .well{font-size:8px}
+.plate.p96{container-type:inline-size}.plate.p96 .well{font-size:9px;font-size:clamp(9px,2.6cqi,13px)}
 .pal{display:flex;flex-direction:column;gap:6px;min-width:0}
 .pal .pi{display:flex;gap:4px;align-items:stretch}
 .pal .pb{flex:1;min-width:0;text-align:left;font:500 12px var(--sans);padding:6px 7px;border:1px solid var(--line-strong);background:var(--bg);color:var(--fg);cursor:pointer;display:flex;align-items:center;gap:4px;overflow:hidden}
@@ -569,7 +569,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.4.4",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.4.5",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
