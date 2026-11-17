@@ -521,6 +521,12 @@ nav{border-radius:var(--r);overflow:hidden}
 .copy code{border-radius:var(--rs)}
 /* accent palette */
 :root{--pk:#e66a96;--lv:#bd97cb;--yl:#f9c642;--tq:#6ad3d6}
+[data-rs="exp"]{--rc:var(--lv)}[data-rs="imp"]{--rc:var(--yl)}[data-rs="proc"]{--rc:var(--tq)}[data-rs="ana"]{--rc:var(--pk)}
+.rchip{display:inline-flex;align-items:center;gap:4px;font:500 11px var(--sans);color:var(--muted)}.rchip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rc)}
+.rrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.rrow .rlab{font:600 12px var(--sans);color:var(--muted)}
+.rsteps{display:flex;gap:4px;flex-wrap:wrap}.rstep{font:500 11px var(--sans);padding:4px 8px;border:1px solid var(--line-strong);border-radius:var(--rp,9px);background:var(--bg);color:var(--muted);cursor:pointer}
+.rstep.on{background:color-mix(in srgb,var(--rc) 28%,var(--bg));border-color:var(--rc);color:var(--fg)}
+.rrow input.rids{width:11em!important;flex:none;font:400 12px var(--sans)!important;padding:4px 8px!important}.ecard .sub .rchip{display:flex;margin-top:2px}
 h2::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pk);margin-right:7px;vertical-align:1px}
 h2:nth-of-type(4n+2)::before{background:var(--yl)}h2:nth-of-type(4n+3)::before{background:var(--tq)}h2:nth-of-type(4n+4)::before{background:var(--lv)}
 details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:nth-of-type(4n+2) h2::before{background:var(--yl)}details.setsec:nth-of-type(4n+3) h2::before{background:var(--tq)}details.setsec:nth-of-type(4n+4) h2::before{background:var(--lv)}
@@ -569,7 +575,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.4.5",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.5.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -1401,11 +1407,16 @@ function plateIcon(vessel,faded){const f=VDEF[vessel];if(!f||!f.r)return"";const
   return`<svg class="pic${faded?" off":""}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(vessel)}"><title>${esc(vessel)}</title><rect x=".6" y=".6" width="${W-1.2}" height="${H-1.2}" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.1"/><g fill="currentColor">${d}</g></svg>`}
 function expPhase(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&(c.status==="active"||c.status==="planned"));const rem=ps.flatMap(nextRem);return rem.some(r=>r.kind!=="Harvest")?"act":"harv"}
 function seedMissed(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl");return ps.length>0&&ps.every(c=>c.status==="planned")&&ps.some(c=>c.seededAt&&c.seededAt<sod(Date.now()))}
+const RST=[["exp","Exported"],["imp","Imported"],["proc","Processed"],["ana","Analysed"]],RSTN=Object.fromEntries(RST);
+function runChip(E){const r=E.run;return r&&r.st?`<span class="rchip" data-rs="${r.st}">Run: ${RSTN[r.st]}${r.ids?` (${esc(r.ids)})`:""}</span>`:""}
+function runRow(E){const r=E.run||{},i=RST.findIndex(x=>x[0]===r.st);return`<div class="rrow"><span class="rlab">Hehe.. Run</span><span class="rsteps">${RST.map(([k,n],j)=>`<button type="button" class="rstep${j<=i?" on":""}" data-rs="${k}" data-act="runSt" data-v="${k}" aria-pressed="${k===r.st}">${n}</button>`).join("")}</span><input class="txt rids" data-runids placeholder="Run IDs" aria-label="Experiment IDs in Hehe.. Run" value="${esc(r.ids||"")}"></div>`}
+function setRun(E,patch){E.run=Object.assign({},E.run||{},patch,{at:Date.now()});if(!E.run.st&&!E.run.ids)delete E.run;save("exps",E)}
 function expCard(E){const ps=Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="tpl"),st=expStatus(E),rem=st==="planning"||st==="done"?[]:ps.filter(c=>c.status!=="ended").flatMap(nextRem).sort((a,b)=>a.d-b.d);
   const ph=st==="running"?expPhase(E):"";return`<div role="button" tabindex="0" class="ecard" data-st="${st}"${ph?` data-ph="${ph}"`:""} data-act="openExp" data-exp="${E.id}" data-sid="${E.id}"><span class="grip egrip" data-grip aria-label="Drag to reorder">⠿</span><span class="eq"><button type="button" class="btn ghost sm" data-act="qDoc" data-exp="${E.id}" aria-label="Download protocol for ${esc(E.name)}">Protocol ⤓</button><button type="button" class="btn ghost sm" data-act="qRun" data-exp="${E.id}" aria-label="Export ${esc(E.name)} for Hehe.. Run">Run ⤓</button></span>${(()=>{const tg=sortTags(E.tags||[]),pill=`<span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`,lns=[...new Set(ps.flatMap(plateLines))].map(id=>S.lines[id]).filter(Boolean).map(L=>L.name);
     return`${ps.length?`<span class="picons">${ps.slice().sort((a,b)=>(a.label||"").localeCompare(b.label||"",undefined,{numeric:true})).map(P=>plateIcon(P.vessel,P.status==="ended"&&st!=="done")).join("")}</span>`:""}<span class="l1 e1">${tg.length?tagSet([tg[0]]):""}<b class="${tg.length?"enm":""}">${esc(E.name)}</b>${pill}</span>${tg.length>1?`<span class="l1">${tagSet(tg.slice(1))}</span>`:""}${lns.length?`<span class="elines">${lns.map(esc).join(" · ")}</span>`:""}`})()}
-    <span class="sub">${st==="planning"?(seedMissed(E)?`<span class="warnc">Seed date not set</span>`:E.seedAt?`seed ${sdd(E.seedAt)}`:""):""}${rem.length&&!seedMissed(E)?`${st==="planning"?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}</span></div>`}
+    <span class="sub">${st==="planning"?(seedMissed(E)?`<span class="warnc">Seed date not set</span>`:E.seedAt?`seed ${sdd(E.seedAt)}`:""):""}${rem.length&&!seedMissed(E)?`${st==="planning"?" · ":""}next: ${esc(rem[0].t||rem[0].kind)} ${sdd(rem[0].d)}`:""}${runChip(E)}</span></div>`}
 function renderPlates(){renderPlates0();tlInit($("tab-plates"))}
+document.addEventListener("change",e=>{const t=e.target;if(!t.matches||!t.matches("[data-runids]"))return;const E=S.exps[openExp];if(!E)return;setRun(E,{ids:t.value.trim()});t.blur();renderPlates()});
 function renderPlates0(){
   const el=$("tab-plates");let exps=Object.values(S.exps).filter(x=>!x.tplOf).sort(expOrd);
   const drafts=Object.values(S.exps).filter(x=>x.tplOf);
@@ -1440,7 +1451,7 @@ function renderPlates0(){
   let h=`<div class="row"><button type="button" class="btn ghost sm" data-act="expList">‹ All experiments</button></div>`;
   h+=`<div class="block thick">${E?`<div class="bh"><div class="etitle">${tagSet(E.tags)}<h3>${esc(E.name)}${st?(()=>{const ph=st==="running"?expPhase(E):"";return` <span class="spill" data-st="${st}"${ph?` data-ph="${ph}"`:""}>${ph==="harv"?"Harvest next":STL[st]}</span>`})():""}</h3></div><span class="row" style="gap:8px"><span class="sub">${ps.length} plate${ps.length===1?"":"s"}</span>${E.tplOf?"":`<select class="menu" data-emenu aria-label="Experiment actions"><option value="">⋯</option><option value="run">Export for Hehe.. Run</option><option value="doc">Export protocol (Word)</option><option value="tpl">Save as template</option><option value="dup">Duplicate</option><option value="del">Delete</option></select>`}</span></div>
       <div class="row"><button class="btn sm solid" data-act="newPlate" data-exp="${E.id}">+ Plate</button><button class="btn sm" data-act="expEdit">Edit</button><button class="btn sm" data-act="expDoc">Protocol ⤓</button><button class="btn sm" data-act="expRun">Hehe.. Run ⤓</button>
-      </div>
+      </div>${E.tplOf?"":runRow(E)}
       ${!E.tplOf&&seedMissed(E)?`<div class="callout" style="border-color:var(--warn)!important;background:color-mix(in srgb,var(--warn) 8%,var(--bg))!important"><b style="color:var(--warn)!important">Seed date not set</b><p class="note" style="margin:0">The planned seeding (${sd(E.seedAt||Date.now())}) has passed, so its actions are off the schedule. Pick a new seeding date and everything moves with it.</p><div class="row"><button class="btn sm solid" data-act="expEdit" style="background:var(--warn);border-color:var(--warn);color:#fff">Set seeding date</button></div></div>`:""}
       ${E.tplOf?`<div class="callout"><b>Template draft</b><p class="note" style="margin:4px 0 8px">Changes here only go into the template. Nothing is scheduled. Dates count from the planned seeding.</p><div class="row"><button class="btn sm solid" data-act="tplSave">Save template</button><button class="btn sm ghost" data-act="tplDiscard">Discard</button></div></div>`:""}
       ${E&&!E.tplOf&&ps.some(c=>c.status==="planned")?(()=>{const h=planHost(E.id);if(h){const pl=h.plan,fl=(pl.srcs||[h.id]).map(id=>S.cultures[id]).filter(Boolean);return`<div class="callout pplan"><b>Passage plan</b><span class="note">${fl.map(F=>esc(srcName(F))).join(" + ")}${fl.length>1?" (pooled)":""} → ${sd(pl.at)}</span><div class="row"><button class="btn sm solid" data-act="startPlan" data-id="${h.id}">Start passage</button><button class="btn sm ghost" data-act="planP" data-id="${h.id}">Edit plan</button></div></div>`}
@@ -1957,6 +1968,7 @@ document.addEventListener("click",e=>{
   if(a==="expEdit"&&E)return expForm(E);
   if(a==="expDoc"&&E)return exportProtocol(E);
   if(a==="expRun"&&E)return exportRun(E);
+  if(a==="runSt"&&E){const v=b.dataset.v,cur=(E.run||{}).st,i=RST.findIndex(x=>x[0]===v);setRun(E,{st:v===cur?(i>0?RST[i-1][0]:""):v});b.blur();renderPlates();return}
   if(a==="clearActs"){const sc=E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P?[P]:[]);return openSheet("Clear all actions?",`<p class="note">Removes every action${E?" in this experiment":" on this plate"}, with their reminders. Harvests stay.</p>`,()=>{sc.forEach(p=>{const p2=clone(S.cultures[p.id]);p2.treatments=[];save("cultures",regen(p2))});toast("Actions cleared")},"Clear all")}
   if(a==="grpActs")return grpActs(E?Object.values(S.cultures).filter(c=>c.expId===E.id&&c.layout&&c.status!=="ended"):(P?[P]:[]));
   if(a==="tplSave"&&E)return tplDraftEnd(E,true);
@@ -2649,7 +2661,7 @@ function runData(E){const iso=t=>t?new Date(t).toISOString():null;
     experiment:{id:E.id,name:E.name,tags:sortTags(E.tags||[]),notes:E.notes||"",status:expStatus(E),seedAt:iso(E.seedAt)},
     cellLines:[...lineIds].map(id=>{const L=S.lines[id]||{};return{id,name:L.name||"",project:L.project||null,tags:L.tags||[]}}),plates,samples}}
 function exportRun(E){if(!E)return;const d=runData(E);if(!d.plates.length){toast("Add a plate with a layout first.");return}
-  saveFile(`${E.name.replace(/[\\/:*?"<>|]+/g," ").trim()||"Experiment"} for Hehe Run.json`,new Blob([JSON.stringify(d,null,1)],{type:"application/json"}),"Saved for Hehe.. Run ✦")}
+  saveFile(`${E.name.replace(/[\\/:*?"<>|]+/g," ").trim()||"Experiment"} for Hehe Run.json`,new Blob([JSON.stringify(d,null,1)],{type:"application/json"}),"Saved for Hehe.. Run ✦");if(!E.run||!E.run.st)setRun(E,{st:"exp"})}
 
 /* ================= frozen stock & boxes ================= */
 let stockQ="",stockLine="";
