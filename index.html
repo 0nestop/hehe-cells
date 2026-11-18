@@ -216,6 +216,7 @@ details.ovw{border:1px solid var(--line-strong);padding:8px 10px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}.brand h1{line-height:1.1}.brand #greet{font-size:12px;display:block}
 .top{align-items:center!important}.tr2{display:flex;align-items:center;gap:8px}
 @media (max-width:520px){#syncState{display:none}}
+#syncState.bad{display:inline!important;color:var(--warn);font-weight:600;cursor:pointer}
 .calm{width:30px;height:30px;border-radius:50%;border:1px dashed var(--line);background:none;color:var(--muted);cursor:pointer;font-size:14px;opacity:.55}
 .calm:hover,.calm:focus-visible{opacity:1;color:var(--c-harv);border-color:var(--c-harv)}
 .masc{flex:none;display:block}
@@ -466,7 +467,8 @@ div.tgrp>.list{border:0;border-left:3px solid var(--line-strong);border-radius:0
 :root[data-theme="dark"] .yard{background:linear-gradient(#1d1a27,#24202f)}:root[data-theme="dark"] .stone small{color:var(--muted)}:root[data-theme="dark"] .stone::after{background:#3f6e37}.rain{position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='80'%3E%3Cg stroke='%235a78aa' stroke-width='1.4' stroke-linecap='round' opacity='.55'%3E%3Cpath d='M8 4l-2 10M30 22l-2 10M50 2l-2 10M18 44l-2 10M42 52l-2 10M56 34l-2 10M4 64l-2 10M28 66l-2 10'/%3E%3C/g%3E%3C/svg%3E");background-size:60px 80px;animation:rainfall .55s linear infinite;opacity:.9}
 @keyframes rainfall{from{background-position:0 0}to{background-position:-16px 80px}}
 .ystones{align-items:end}.stone{justify-content:flex-end}.stone small{order:-1;min-height:2.3em;display:flex;align-items:flex-end;justify-content:center;color:#5c636b}.stone svg{width:44px;height:60px}.stone.on svg path:first-child{stroke:var(--hi);stroke-width:2}
-.ystones{gap:8px 0!important;padding:0!important}.stone{position:relative;padding:2px 0 7px!important;border-radius:10px 10px 0 0!important}.stone::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:#8cc97a}.stone svg{margin-bottom:-3px;position:relative;z-index:1}.yard.rainy .stone::after{background:#78b067}
+.ystones{gap:8px 0!important;padding:0!important}
+.ystones{display:flex!important;flex-wrap:wrap;justify-content:space-around;align-items:flex-start!important;gap:0!important;padding:4px 4px 10px!important;border-radius:14px;background:radial-gradient(ellipse at 30% 20%,#c4e3b2,transparent 60%),linear-gradient(#b3dba0,#93c97f)}.yard.rainy .ystones{background:linear-gradient(#9cc68a,#7fb06c)}:root[data-theme="dark"] .ystones{background:linear-gradient(#2c4529,#365a31)!important}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ystones{background:linear-gradient(#2c4529,#365a31)!important}:root:not([data-theme="light"]) .stone small{color:#c9d8c1!important}}:root[data-theme="dark"] .stone small{color:#c9d8c1!important}.stone::after{display:block!important;content:"";position:absolute;left:22%;right:22%;bottom:calc(6px + 1.3em)!important;top:auto;height:5px!important;border-radius:50%;background:rgba(0,0,0,.14)!important}.stone{width:70px;padding:0 0 6px!important;margin:var(--dy,0px) 0 0 var(--dx,0px);border-radius:10px!important}.stone small{color:#3d4d36!important;min-height:0!important;order:1!important;display:block!important;margin-top:1px;position:relative;z-index:1}.stone svg{width:52px!important;height:61px!important;transform:rotate(var(--rot,0deg));transform-origin:50% 95%;margin-bottom:0!important}.stone.on{background:rgba(255,255,255,.35)}.stone{position:relative;padding:2px 0 7px!important;border-radius:10px 10px 0 0!important}.stone::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;background:#8cc97a}.stone svg{margin-bottom:-3px;position:relative;z-index:1}.yard.rainy .stone::after{background:#78b067}
 .bottle{pointer-events:auto!important;touch-action:none;cursor:grab}.bottle.held{cursor:grabbing;transition:none!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
 .oitem{filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}.oslot{padding:2px!important;border-radius:7px}.oslot .osil{opacity:.22}
 .grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted);font-size:16px;line-height:1;padding:4px 6px 4px 0;opacity:.7}.grip:active{cursor:grabbing}
@@ -575,7 +577,7 @@ details.setsec:nth-of-type(4n+1) h2::before{background:var(--pk)}details.setsec:
 <div id="toast" hidden></div>
 
 <script id="app">
-const APPV="2.5.0",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
+const APPV="2.5.1",PWA_URL="https://0nestop.github.io/hehe-cells/",IS_PWA=!!document.querySelector('link[rel=manifest]');
 let SRC0="";try{const d=document.documentElement.cloneNode(true);d.querySelectorAll("script:not(#app),meta[http-equiv]").forEach(x=>x.remove());SRC0="<!doctype html>\n"+d.outerHTML}catch(e){}
 /* ================= helpers ================= */
 const $=id=>document.getElementById(id);
@@ -653,9 +655,19 @@ const DEFSET=()=>({vessels:{},skipWeekends:true,targetConf:90,templates:[],expTe
 const S={lines:{},cultures:{},exps:{},boxes:{},vials:{},settings:DEFSET(),ready:false};
 let DB=null;const wq={};
 function persistLocal(){ls.set("bench-data",{lines:S.lines,cultures:S.cultures,exps:S.exps,boxes:S.boxes,vials:S.vials,settings:S.settings})}
+/* sync guard: a collection is "fresh" once the server (not this device's cache) has answered. Saves wait for that,
+   so an old cached copy can never be written back over newer data. Failed saves are kept and can be retried. */
+const FRESH={},FAILW={};let PENDW=0,STOPPED=false;
+const isFresh=x=>!(x&&x.metadata&&x.metadata.fromCache);
+function syncLabel(){const el=$("syncState");if(!el||!DB)return;const nf=Object.keys(FAILW).length;
+  el.classList.toggle("bad",!!(nf||STOPPED));
+  el.textContent=STOPPED?"sync stopped — reload":nf?`${nf} change${nf>1?"s":""} not saved — tap to retry`:PENDW>0?"saving…":Object.keys(FRESH).length<6?"checking with server…":"synced to your account"}
+function retryFailed(){Object.keys(FAILW).forEach(p=>{const b=FAILW[p].body;delete FAILW[p];write(p,b)});syncLabel()}
 function write(path,body){if(!DB){persistLocal();return}
-  wq[path]=(wq[path]||Promise.resolve()).then(()=>body?DB.doc(path).set(JSON.parse(JSON.stringify(body))):DB.doc(path).delete()).catch(e=>
-    toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete old ended cultures to free space.":"Couldn't save. Check your connection and try again."))}
+  if(!FRESH[path.split("/")[0]]){toast("Still checking with the server, so that wasn't saved. Try again in a moment.");return}
+  const data=body?JSON.parse(JSON.stringify(body)):null;PENDW++;delete FAILW[path];syncLabel();
+  wq[path]=(wq[path]||Promise.resolve()).then(()=>data?DB.doc(path).set(data):DB.doc(path).delete()).then(()=>{PENDW--;delete FAILW[path];syncLabel()},e=>{PENDW--;FAILW[path]={body:data};syncLabel();
+    toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete old ended cultures to free space.":"Couldn't save. Check your connection, then tap the sync status to retry.")})}
 function save(coll,obj){S[coll][obj.id]=obj;renderData();write(coll+"/"+obj.id,obj);if(coll==="cultures"&&!obj.layout&&!FIXING){clearTimeout(save.ft);save.ft=setTimeout(fixFlaskNames,80)}}
 function remove(coll,id){delete S[coll][id];renderData();write(coll+"/"+id,null)}
 let setTimer=null;
@@ -679,11 +691,12 @@ function norm(c){if(!c||!c.layout)return c;const Lo=c.layout;
 async function initStore(){
   let db=null;try{db=window.claude&&window.claude.use?await window.claude.use("db"):null}catch(e){}
   if(db){DB=db;
-    const sub=coll=>db.collection(coll).onSnapshot(s=>{const m={};s.docs.forEach(d=>{const o=Object.assign({},clone(d.data()),{id:d.id});m[d.id]=coll==="cultures"?norm(o):o});S[coll]=m;S.ready=true;renderData()},
-      ()=>{$("syncState").textContent="sync stopped — reload"});
+    const sub=coll=>db.collection(coll).onSnapshot(s=>{if(isFresh(s))FRESH[coll]=1;const m={};s.docs.forEach(d=>{const o=Object.assign({},clone(d.data()),{id:d.id});m[d.id]=coll==="cultures"?norm(o):o});S[coll]=m;S.ready=true;syncLabel();renderData()},
+      ()=>{STOPPED=true;syncLabel()});
     sub("lines");sub("cultures");sub("exps");sub("boxes");sub("vials");
-    db.doc("settings/main").onSnapshot(d=>{if(d.exists)S.settings=Object.assign(DEFSET(),clone(d.data()));renderData()},()=>{});
-    $("syncState").textContent="synced to your account";
+    db.doc("settings/main").onSnapshot(d=>{if(isFresh(d))FRESH.settings=1;if(d.exists)S.settings=Object.assign(DEFSET(),clone(d.data()));syncLabel();renderData()},()=>{STOPPED=true;syncLabel()});
+    $("syncState").addEventListener("click",()=>{if(Object.keys(FAILW).length)retryFailed()});window.addEventListener("online",()=>{if(Object.keys(FAILW).length)retryFailed()});
+    syncLabel();
   }else{const d=ls.get("bench-data",{});S.lines=d.lines||{};S.cultures=d.cultures||{};Object.values(S.cultures).forEach(norm);S.exps=d.exps||{};S.boxes=d.boxes||{};S.vials=d.vials||{};if(d.settings)S.settings=Object.assign(DEFSET(),d.settings);S.ready=true;
     $("syncState").textContent="saved on this device only";try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}renderData()}
 }
@@ -994,7 +1007,8 @@ function endCulture(C,{harvested,pct,verdict,note,timing}){const tOK=timing&&tim
   C2.status="ended";C2.endedAt=at;C2.endNote=[note,isFinite(harvested)&&harvested>0?`${cells(harvested)} harvested`:"",pct?`${pct}% confluent`:"",tOK?`passaged ${timing.toLowerCase()}`:"",verdict&&verdict!=="About right"&&verdict!=="Skip"?verdict.toLowerCase():""].filter(Boolean).join(" · ");
   addLog(C2,C2.endNote);save("cultures",C2);
   if(L){const L2=clone(L);let ch=false;
-    if(isFinite(harvested)&&harvested>0&&C.seeded>0){L2.records=(L2.records||[]).concat({d:at,vessel:C.vessel,area:cArea(C)*wellsUsed(C),seeded:C.seeded*wellsUsed(C),harvested,hours:(at-C.seededAt)/H,pct:pct||null,verdict,timing:timing||null});ch=true}
+    if(isFinite(harvested)&&harvested>0&&C.seeded>0&&harvested<C.seeded*wellsUsed(C)/20)later(()=>toast(`${cells(harvested)} harvested looks too low for this flask, so it wasn't added to the growth records.`));
+    else if(isFinite(harvested)&&harvested>0&&C.seeded>0){L2.records=(L2.records||[]).filter(r=>r.cid!==C.id).concat({cid:C.id,d:at,vessel:C.vessel,area:cArea(C)*wellsUsed(C),seeded:C.seeded*wellsUsed(C),harvested,hours:(at-C.seededAt)/H,pct:pct||null,verdict,timing:timing||null});ch=true}
     if(verdict&&verdict!=="About right"&&verdict!=="Skip"){L2.log=(L2.log||[]).concat({d:at,t:`${C.vessel} seeded at ${cells(C.seeded)} (${cells(C.seeded/cArea(C))}/cm²): ${verdict.toLowerCase()}`});ch=true}
     if(tOK){L2.log=(L2.log||[]).concat({d:at,t:`${C.vessel} passaged ${timing.toLowerCase()} after ${Math.round((at-C.seededAt)/H)} h${pct?` at ${pct}%`:""}${isFinite(harvested)&&harvested>0?`, ${cells(harvested)} harvested`:""}`});ch=true}
     if(ch)save("lines",L2)}
@@ -2427,29 +2441,40 @@ let GSEL=null;
 function flowers(){const s=S.settings.mourn||{},loc=gget("mourn",null);if(loc&&Object.keys(loc).length){const m=Object.assign({},s);Object.entries(loc).forEach(([id,x])=>{const a=m[id];if(!a||(x.n||0)>(a.n||0))m[id]=x});S.settings.mourn=m;saveSettings(false);try{localStorage.removeItem("mourn")}catch(e){}return m}return s}
 function graveName(c){const L=S.lines[c.lineId];return`${L?L.name:"Unknown"} ${c.layout?(c.label||c.vessel):pTxt(c)}`}
 let GRAIN=false;
-function stoneSVG(c,n){const lv=Math.floor(n/9),rem=n%9,bq=Math.floor(rem/3),fl=rem%3,age=Math.floor((Date.now()-(c.endedAt||Date.now()))/DAY),moss=age>=60?3:age>=21?2:age>=7?1:0;
-  const tall=lv>=2,top=tall?10:16,body=lv>=2?"#d5d8dc":"#b9bdc3",edge=lv>=3?"#e8b923":lv>=2?"#aeb3b9":"none";
-  let s=`<path d="M7 58V${top+12}a15 15 0 0 1 30 0V58z" fill="${body}"${edge!=="none"?` stroke="${edge}" stroke-width="2"`:""}/>`;
-  s+=`<text x="22" y="${top+22}" text-anchor="middle" font-size="6.5" font-weight="600" fill="#6c727a">RIP</text>`;
-  if(lv>=1)s+=`<path d="M22 ${top-9}v10M17.5 ${top-5}h9" stroke="${lv>=3?"#e8b923":"#8d939a"}" stroke-width="2.4" stroke-linecap="round"/>`;
-  if(lv>=3)s+=`<text x="22" y="${top+34}" text-anchor="middle" font-size="8" fill="#e8b923">★${lv>3?lv-2:""}</text>`;
-  if(moss)s+=`<g fill="#74b816" opacity=".85"><ellipse cx="11" cy="56" rx="${3+moss*1.6}" ry="${1.8+moss*.7}"/>${moss>1?`<ellipse cx="34" cy="55" rx="${2+moss}" ry="${1.6+moss*.5}"/><circle cx="9" cy="${44-moss*3}" r="${1+moss*.5}"/>`:""}${moss>2?`<circle cx="33" cy="38" r="2"/><ellipse cx="20" cy="${top+3}" rx="5" ry="1.8"/>`:""}</g>`;
-  let x=4;const foot=[];for(let i=0;i<bq;i++)foot.push(`<g transform="translate(${x},44)"><path d="M3 14l2-8M5 14V5M7 14l-2-8" stroke="#2f9e44" stroke-width="1"/><circle cx="2.5" cy="5" r="2.2" fill="#f783ac"/><circle cx="5" cy="3.4" r="2.2" fill="#ffd43b"/><circle cx="7.5" cy="5" r="2.2" fill="#da77f2"/></g>`),x+=9;
-  for(let i=0;i<fl;i++)foot.push(`<g transform="translate(${x+(i?2:0)},52)"><path d="M2 6V2" stroke="#2f9e44" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="#f783ac"/></g>`),x+=5;
-  return`<svg viewBox="0 0 44 60" aria-hidden="true">${s}${foot.join("")}</svg>`}
+const GSTG=[0,1,3,6,10,15,21,28,36],GSTN=["Stone slab","Little headstone","Headstone","Headstone with cross","Headstone with vases","Marble headstone","Golden marble","Mausoleum","Grand mausoleum"];
+function gStage(n){let s=0;GSTG.forEach((t,i)=>{if(n>=t)s=i});return s}
+function stoneSVG(c,n){const st=gStage(n),age=Math.floor((Date.now()-(c.endedAt||Date.now()))/DAY),moss=age>=60?3:age>=21?2:age>=7?1:0;
+  const G="#e8b923",GR="#b9bdc3",GL="#cfd3d8",MB="#f1f2f4",MS="#c3c8ce",TX="#6c727a",FL=["#f783ac","#ffd43b","#da77f2","#ff8787"];
+  const rip=(y,c2=TX,sz=6.5)=>`<text x="28" y="${y}" text-anchor="middle" font-size="${sz}" font-weight="600" fill="${c2}" font-family="sans-serif">RIP</text>`;
+  const cross=(y,c2,w=2.4)=>`<path d="M28 ${y}v11M23.5 ${y+3.6}h9" stroke="${c2}" stroke-width="${w}" stroke-linecap="round"/>`;
+  const vase=(x,col)=>`<g transform="translate(${x},47)"><path d="M1 13h6l-1-7H2z" fill="${col}"/><path d="M4 6V1M4 6L1.5 2M4 6l2.5-4" stroke="#2f9e44" stroke-width=".9"/><circle cx="4" cy="1" r="1.6" fill="${FL[0]}"/><circle cx="1.5" cy="2" r="1.5" fill="${FL[1]}"/><circle cx="6.5" cy="2" r="1.5" fill="${FL[2]}"/></g>`;
+  let s="";
+  if(st===0){s=`<path d="M8 60l3-7h34l3 7z" fill="#a9aeb4"/><path d="M11 53h34" stroke="#c4c8cd" stroke-width="1.2"/><path d="M24 54.5l3 2.5-2 2" stroke="#8d939a" stroke-width=".8" fill="none"/>`}
+  else if(st===1){s=`<path d="M20 60V49a8 8 0 0 1 16 0V60z" fill="#aeb3b9"/><path d="M25 50l2 3-1.5 2.5" stroke="#8d939a" stroke-width=".8" fill="none"/>`}
+  else if(st===2){s=`<path d="M14 60V34a14 14 0 0 1 28 0V60z" fill="${GR}"/><path d="M17.5 58V34.5a10.5 10.5 0 0 1 21 0V58z" fill="none" stroke="#9ea4ab" stroke-width="1"/>${rip(41)}`}
+  else if(st===3){s=`<rect x="10" y="56" width="36" height="4" rx="1" fill="#a9aeb4"/><path d="M15 56V31a13 13 0 0 1 26 0V56z" fill="${GR}"/>${cross(5,"#8d939a")}${rip(38)}<path d="M20 47h16M22 50.5h12" stroke="#9ea4ab" stroke-width="1"/>`}
+  else if(st===4){s=`<rect x="6" y="56" width="44" height="4" rx="1" fill="#a9aeb4"/><rect x="10" y="52" width="36" height="5" rx="1" fill="#b9bdc3"/><path d="M16 52V30a12 12 0 0 1 24 0V52z" fill="${GL}"/>${cross(4,"#8d939a")}${rip(36)}<path d="M21 44h14M23 47.5h10" stroke="#a3a9b0" stroke-width="1"/>${vase(3,"#868e96")}${vase(45,"#868e96")}`}
+  else if(st===5){s=`<rect x="5" y="56" width="46" height="4" rx="1" fill="#ced4da"/><rect x="9" y="51" width="38" height="6" rx="1" fill="#dee2e6"/><path d="M15 51V30Q15 18 28 10Q41 18 41 30V51z" fill="${MB}" stroke="${MS}" stroke-width="1"/><path d="M18.5 49V30.5Q18.5 21 28 14.5Q37.5 21 37.5 30.5V49z" fill="none" stroke="${MS}" stroke-width=".8"/>${cross(0,MS,2.2)}${rip(33,"#868e96")}${vase(2,"#adb5bd")}${vase(46,"#adb5bd")}`}
+  else if(st===6){s=`<rect x="4" y="56" width="48" height="4" rx="1" fill="#ced4da"/><rect x="8" y="51" width="40" height="6" rx="1" fill="#e9ecef" stroke="${G}" stroke-width=".8"/><path d="M14 51V29Q14 17 28 9Q42 17 42 29V51z" fill="${MB}" stroke="${G}" stroke-width="1.6"/>${cross(-1,G,2.4)}<circle cx="28" cy="37" r="7" fill="none" stroke="#2f9e44" stroke-width="2.4"/><g fill="${FL[0]}"><circle cx="28" cy="30" r="1.3"/><circle cx="34" cy="40.5" r="1.3"/><circle cx="22" cy="40.5" r="1.3"/></g><g fill="${FL[1]}"><circle cx="33.5" cy="33" r="1.2"/><circle cx="22.5" cy="33" r="1.2"/><circle cx="28" cy="44" r="1.2"/></g>${rip(25,"#b08900",5)}<text x="28" y="49.5" text-anchor="middle" font-size="5" fill="${G}">✦</text>${vase(1,G)}${vase(47,G)}`}
+  else if(st===7){s=`<rect x="3" y="57" width="50" height="3" fill="#adb5bd"/><rect x="6" y="54" width="44" height="3.5" fill="#ced4da"/><rect x="9" y="27" width="38" height="27" fill="#dee2e6"/><path d="M6 28L28 13L50 28z" fill="#ced4da" stroke="#adb5bd" stroke-width="1"/><rect x="7" y="27" width="42" height="3" fill="#adb5bd"/>${[12,19.5,34.5,42].map(x=>`<rect x="${x}" y="30" width="3" height="24" fill="${MB}" stroke="#ced4da" stroke-width=".5"/>`).join("")}<path d="M24 54V41a4 4 0 0 1 8 0V54z" fill="#495057"/><text x="28" y="24.5" text-anchor="middle" font-size="5" font-weight="600" fill="#868e96" font-family="sans-serif">RIP</text>${cross(4,"#adb5bd",2)}`}
+  else{s=`<rect x="1" y="57" width="54" height="3" fill="#ced4da"/><rect x="4" y="54" width="48" height="3.5" fill="#e9ecef" stroke="${G}" stroke-width=".6"/><rect x="8" y="30" width="40" height="24" fill="${MB}"/><rect x="6" y="28" width="44" height="3" fill="${G}"/><path d="M14 28a14 14 0 0 1 28 0z" fill="${G}"/><path d="M18 28a10 10 0 0 1 20 0" fill="none" stroke="#fff3bf" stroke-width="1"/><path d="M28 14V7M25 9.5h6" stroke="${G}" stroke-width="2" stroke-linecap="round"/><text x="28" y="6" text-anchor="middle" font-size="6" fill="${G}">★</text>${[10.5,17.5,36.5,43.5].map(x=>`<rect x="${x}" y="31" width="2.6" height="23" fill="#fff" stroke="${MS}" stroke-width=".5"/><rect x="${x-.6}" y="31" width="3.8" height="1.4" fill="${G}"/>`).join("")}<path d="M23.5 54V42a4.5 4.5 0 0 1 9 0V54z" fill="#5f3dc4"/><path d="M28 47.5l-2.2-2.2a1.3 1.3 0 0 1 2.2-1.5a1.3 1.3 0 0 1 2.2 1.5z" fill="${FL[0]}"/><g transform="translate(0,0)"><circle cx="4" cy="50" r="2.2" fill="#ffe066"/><path d="M4 52v5" stroke="${G}" stroke-width="1"/><circle cx="52" cy="50" r="2.2" fill="#ffe066"/><path d="M52 52v5" stroke="${G}" stroke-width="1"/></g>`}
+  if(moss)s+=`<g fill="#74b816" opacity=".85"><ellipse cx="13" cy="59" rx="${3+moss*1.6}" ry="${1.6+moss*.6}"/>${moss>1?`<ellipse cx="43" cy="58.5" rx="${2+moss}" ry="${1.5+moss*.5}"/>`:""}${moss>2?`<ellipse cx="28" cy="59.5" rx="4" ry="1.4"/><circle cx="${st>=7?10:18}" cy="${st>=7?40:46}" r="1.6"/>`:""}</g>`;
+  const k=Math.min(6,n-GSTG[st]);let f="";for(let i=0;i<k;i++){const x=6+i*8+(i%2)*2;f+=`<g transform="translate(${x},${57+(i%2)})"><path d="M2 3V0" stroke="#2f9e44" stroke-width="1"/><circle cx="2" cy="0" r="1.7" fill="${FL[i%4]}"/></g>`}
+  return`<svg viewBox="0 -2 56 66" aria-hidden="true">${s}${f}</svg>`}
+const ghash=(id,salt)=>{let h=salt||7;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))>>>0;h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;return(h^(h>>>15))/4294967296};
 function mournHTML(){const dead=fallen(),fl=flowers(),td=sod(Date.now()),tot=Object.values(fl).reduce((a,x)=>a+(x.n||0),0);
   if(!dead.length)return`<div class="empty"><p class="note">No fallen cultures yet. Long may they divide ✦</p></div>`;
   const by={};dead.forEach(c=>{const d=new Date(c.endedAt||c.seededAt),k=d.toLocaleDateString(undefined,{month:"long",year:"numeric"});(by[k]=by[k]||[]).push(c)});
   const sel=GSEL&&dead.find(c=>c.id===GSEL);
-  const detail=c=>{const x=fl[c.id]||{n:0},n=x.n||0,vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY)),E=c.expId&&S.exps[c.expId],lv=Math.floor(n/9),rem=n%9;
-    const prog=`${lv?`Tomb upgraded ${lv}× · `:""}${Math.floor(rem/3)} bouquet${Math.floor(rem/3)===1?"":"s"} · ${rem%3} flower${rem%3===1?"":"s"}`;
+  const detail=c=>{const x=fl[c.id]||{n:0},n=x.n||0,vis=x.last===td,days=Math.max(0,Math.round(((c.endedAt||Date.now())-c.seededAt)/DAY)),E=c.expId&&S.exps[c.expId],st=gStage(n),nx=GSTG[st+1];
+    const prog=`${GSTN[st]} · ${n} flower${n===1?"":"s"}${nx?` · ${nx-n} more for ${GSTN[st+1].toLowerCase()}`:" · the grandest grave of all ✦"}`;
     return`<div class="gdet"><div class="bh"><b>${esc(graveName(c))}</b><button type="button" class="btn ghost sm" data-mclose aria-label="Close">✕</button></div>
       <span class="sub">${esc(c.vessel)}${E?` · ${esc(E.name)}`:""} · ${sd(c.seededAt)} – ${c.endedAt?sd(c.endedAt):"?"} · lived ${days} day${days===1?"":"s"}</span>
-      ${c.endNote?`<span class="sub">${esc(c.endNote)}</span>`:""}<i>${esc(epitaph(c))}</i><span class="sub">${prog}. 3 flowers make a bouquet, 3 bouquets upgrade the tomb.</span>
+      ${c.endNote?`<span class="sub">${esc(c.endNote)}</span>`:""}<i>${esc(epitaph(c))}</i><span class="sub">${prog}</span>
       <div class="row"><button type="button" class="btn sm${vis?" ghost":" solid"}" data-mfl="${c.id}"${vis?" disabled":""}>${vis?"Visited today ✿":"Lay a flower ✿"}</button></div></div>`};
   return`<p class="sub">${dead.length} fallen culture${dead.length>1?"s":""} · ${tot} flower${tot===1?"":"s"} laid</p><div class="row"><button type="button" class="btn sm solid" data-mflall>Lay a flower for everyone</button><button type="button" class="btn sm${GRAIN?" solid":""}" data-mrain>${GRAIN?"Stop the rain":"Make it rain ☔"}</button></div>
-  <div class="yard${GRAIN?" rainy":""}">${Object.entries(by).map(([m,cs])=>`<div class="yrow"><span class="ym">${esc(m)}</span><div class="ystones">${cs.map(c=>{const x=fl[c.id]||{n:0};
-    return`<button type="button" class="stone${c.id===GSEL?" on":""}" data-mgrave="${c.id}" aria-label="${esc(graveName(c))}"><small>${esc(graveName(c))}</small>${stoneSVG(c,x.n||0)}</button>`}).join("")}</div></div>`).join("")}${GRAIN?`<div class="rain" aria-hidden="true"></div>`:""}</div>
+  <div class="yard${GRAIN?" rainy":""}">${Object.entries(by).map(([m,cs])=>`<div class="yrow"><span class="ym">${esc(m)}</span><div class="ystones">${cs.slice().sort((a,b)=>ghash(a.id,3)-ghash(b.id,3)).map(c=>{const x=fl[c.id]||{n:0};
+    return`<button type="button" class="stone${c.id===GSEL?" on":""}" style="--dy:${Math.round(ghash(c.id,5)*26)}px;--dx:${Math.round(ghash(c.id,11)*16)}px;--rot:${(ghash(c.id,17)*7-3.5).toFixed(1)}deg" data-mgrave="${c.id}" aria-label="${esc(graveName(c))}"><small>${esc(graveName(c))}</small>${stoneSVG(c,x.n||0)}</button>`}).join("")}</div></div>`).join("")}${GRAIN?`<div class="rain" aria-hidden="true"></div>`:""}</div>
   ${sel?detail(sel):`<p class="note">Tap a grave to visit. One flower per culture per day. Older graves grow moss.</p>`}`}
 function mournClick(e){const fl=flowers(),td=sod(Date.now());let b;const lay=id=>{const x=fl[id]||{n:0};if(x.last===td)return false;x.n=(x.n||0)+1;x.last=td;fl[id]=x;return true};const keep=()=>{S.settings.mourn=fl;saveSettings(false)};
   if((b=e.target.closest("[data-mgrave]"))){GSEL=GSEL===b.dataset.mgrave?null:b.dataset.mgrave;calmGame();setTimeout(()=>{const d=$("sheetForm").querySelector(".gdet");if(d)d.scrollIntoView({block:"nearest",behavior:"smooth"})},30);return}
